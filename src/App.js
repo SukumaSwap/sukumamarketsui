@@ -28,6 +28,7 @@ import { useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
 import Sell from './applications/market/pages/sell/Sell';
 import CreateTokenBuyTrade from './applications/market/pages/buy/CreateTokenBuyTrade';
+import TokenChat from './applications/market/pages/chats/TokenChat';
 
 
 const MainHome = () => {
@@ -76,7 +77,7 @@ function App() {
   }
 
   useEffect(() => {
-    createAccount()
+    // createAccount()
   }, [])
 
   return (
@@ -95,15 +96,15 @@ function App() {
             <Route path="sell/create-sell-trade/:offer_id/" element={<CreateBuyTrade />} />
 
             <Route path="chats/:chat_id/" element={<TradeChat />} />
-            <Route path="chats/token/:chat_id/" element={<TradeChat />} />
+            <Route path="chats/token/:chat_id/" element={<TokenChat />} />
 
-            <Route path="accounts/:accountid" element={<UserAccount />} />
+            <Route path="accounts/:account_id" element={<UserAccount />} />
 
-            <Route path="trades/" element={<Trades />} />
+            <Route path="trades/" element={<TradeChats />} />
             <Route path="transfers/" element={<Transfers />} />
             <Route path="offers/" element={<Offers />} />
             <Route path="offers/new/" element={<CreateOffer />} />
-            <Route path="trade-chats/" element={<TradeChats />} />
+            {/* <Route path="trade-chats/" element={<TradeChats />} /> */}
 
             <Route path="community/" element={<CommunityWrapper />}>
               <Route path='chats' element={<CommunityChats />} >

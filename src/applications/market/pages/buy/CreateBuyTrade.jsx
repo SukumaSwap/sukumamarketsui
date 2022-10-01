@@ -274,24 +274,20 @@ const CreateBuyTrade = () => {
         // Payer and receiver are marked in terms of KES, receiver - is the receiver of the KES in this case the receiver and vice versa
         setDoc(doc(db, "chatmsgs", chat_id), {
             messages: [],
-            chatOwner: window.walletConnection.getAccountId(),
-            offerer: offerDetails.offerer,
-            offer_type: offerDetails.offer_type,
-            amount: pay,
-            offer_id: offer_id,
-            payer: window.walletConnection.getAccountId(),
-            receiver: offerDetails.offerer,
             paid: false,
             received: false,
             canceled: false,
+            released: false,
             active: true,
+            payer_has_rated: false,
+            receiver_has_rated: false,
             admin: null,
         })
         showNotification({
             title: "Chat created",
             message: "Chat created successfully",
             color: "green",
-            icon: <IconExclamationMark />
+            icon: <IconCheck />
         })
         setLoading(false)
         navigate(chat_path)

@@ -296,10 +296,12 @@ const TradeChats = () => {
 
     const loadChats = () => {
         setLoading(true)
+        console.log("loading chats")
         const contract = window.contract
         const wallet = window.walletConnection
         if (contract && wallet) {
             wallet.account().viewFunction(CONTRACT, "get_account_chats", { account_id: wallet.getAccountId() }).then(res => {
+                console.log("have been reached", res)
                 if (typeof res === 'object') {
                     setChats(res)
                 }
@@ -341,7 +343,7 @@ const TradeChats = () => {
         })}>
 
             <Group position='apart' px="md" mb="md">
-                <Title>Trade Chats</Title>
+                <Title>Trade</Title>
                 <SelectTableHeaders headers={headers} selectHeader={selectHeader} />
             </Group>
 

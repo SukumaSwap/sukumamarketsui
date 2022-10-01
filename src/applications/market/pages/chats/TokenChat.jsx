@@ -14,6 +14,7 @@ import { db, updateDoc, doc, onSnapshot, serverTimestamp, Timestamp } from '../.
 import { useModals } from '@mantine/modals';
 import { ConnectWalletButton } from '../../../../components/common/AccountButton';
 import { getHotkeyHandler } from '@mantine/hooks';
+import TokenPreview from '../buy/TokenPreview';
 
 
 const OfferDetail = ({ obj }) => {
@@ -138,8 +139,7 @@ const TradeAction = ({ obj }) => {
 }
 
 
-// #3cc8c800
-const TradeChat = () => {
+const TokenChat = () => {
 
     const [chat, setChat] = useState(null)
     const [messages, setMessages] = useState([])
@@ -161,7 +161,6 @@ const TradeChat = () => {
 
     const executeScroll = () => {
         if (chatBodyRef) {
-            // chatBodyRef.current.scrollTo(0, scrollBottomRef.current.offsetTop)
             scrollBottomRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }
@@ -172,8 +171,15 @@ const TradeChat = () => {
 
     const loadTradeChat = () => {
         const wallet = window.walletConnection
-        if (wallet) {
-            wallet.account().viewFunction(CONTRACT, "pub_get_chat", { "chat_id": chat_id }).then(res => {
+        const contract = window.contract
+        if (wallet && contract) {
+            // wallet.account().viewFunction(CONTRACT, "pub_get_token_chat", { "chat_id": chat_id }).then(res => {
+            //     setChat(res?.chat)
+            //     setOfferDetails(res?.offer)
+            // }).catch(err => {
+            //     console.log("Fetching chat error", err)
+            // })
+            contract.pub_get_token_chat({ "chat_id": chat_id }).then(res => {
                 setChat(res?.chat)
                 setOfferDetails(res?.offer)
             }).catch(err => {
@@ -183,18 +189,10 @@ const TradeChat = () => {
     }
 
     const getPrice = () => {
-        getTokenPrice("wrap.testnet").then(res => {
+        getTokenPrice(chat?.offer_id).then(res => {
             setTokenPrice(res?.price)
         }).catch(err => {
             console.log("Token price error", err)
-        })
-    }
-
-    const updateFirebase = (object) => {
-        const doc__ref = doc(db, `chatmsgs/${chat_id}`);
-        updateDoc(doc__ref, object).then(fulfilled => {
-        }).catch(err => {
-            console.log(err)
         })
     }
 
@@ -202,7 +200,7 @@ const TradeChat = () => {
         const contract = window.contract
         if (contract && contract.mark_as_paid) {
             setLoading(true)
-            contract.mark_as_paid({ chat_id: chat_id }).then(res => {
+            contract.mark_token_as_paid({ chat_id: chat_id }).then(res => {
                 // updateFirebase({ paid: true })
                 fbSendMsg(`<b>${chat?.payer}</b> has marked the trade as paid`, { paid: true })
             }).catch(err => {
@@ -218,7 +216,7 @@ const TradeChat = () => {
         const conn = window.walletConnection
         if (contract && conn && contract.mark_as_received) {
             setLoading(true)
-            contract.mark_as_received({ chat_id: chat_id }).then(res => {
+            contract.mark_token_as_received({ chat_id: chat_id }).then(res => {
                 // updateFirebase({ received: true })
                 fbSendMsg(`<b>${chat?.receiver}</b> has released the asset.`, { received: true, released: true })
                 showNotification({
@@ -244,7 +242,7 @@ const TradeChat = () => {
         const conn = window.walletConnection
         if (contract && conn && contract.receiver_rate_chat) {
             setLoading(true)
-            contract.receiver_rate_chat({ chat_id: chat_id, rating: rating }).then(res => {
+            contract.receiver_token_rate_chat({ chat_id: chat_id, rating: rating }).then(res => {
                 // updateFirebase({ receiver_has_rated: true })
                 fbSendMsg(`<b>${chat?.receiver}</b> has left a rating.`, { receiver_has_rated: true })
                 showNotification({
@@ -270,7 +268,7 @@ const TradeChat = () => {
         const conn = window.walletConnection
         if (contract && conn && contract.payer_rate_chat) {
             setLoading(true)
-            contract.payer_rate_chat({ chat_id: chat_id, rating: rating }).then(res => {
+            contract.payer_token_rate_chat({ chat_id: chat_id, rating: rating }).then(res => {
                 // updateFirebase({ payer_has_rated: true })
                 fbSendMsg(`<b>${chat?.payer}</b> has left a rating.`, { payer_has_rated: true })
 
@@ -296,7 +294,7 @@ const TradeChat = () => {
         const conn = window.walletConnection
         if (contract && conn) {
             setLoading(true)
-            contract.cancel_chat({ chat_id: chat_id }).then(res => {
+            contract.cancel_token_chat({ chat_id: chat_id }).then(res => {
                 fbSendMsg(`<b>${window?.walletConnection?.getAccountId()}</b> has canceled the trade.`, { canceled: true })
             }).catch(err => {
                 console.log(err)
@@ -370,11 +368,14 @@ const TradeChat = () => {
 
     }
 
-
     useEffect(() => {
-        loadTradeChat()
         getPrice()
-    }, [])
+    }, [chat])
+
+
+    // useEffect(() => {
+    //     loadTradeChat()
+    // }, [])
 
     useEffect(() => {
         loadTradeChat()
@@ -396,7 +397,7 @@ const TradeChat = () => {
         return unsub;
     }, [])
 
-    console.log("message", chat)
+    // console.log("message", firestoreChat)
 
     return (
         <>
@@ -539,24 +540,9 @@ const TradeChat = () => {
                                         background: getTheme(theme) ? theme.colors.dark[4] : theme.colors.gray[2]
                                     })}>
                                         <Title order={3}>Offer Details</Title>
-                                        <Paper p="xs" radius="md" my="sm" sx={theme => ({
-                                            background: getTheme(theme) ? theme.colors.dark[8] : theme.colors.gray[5]
-                                        })}>
-                                            <Group position='apart'>
-                                                <Group>
-                                                    <Avatar />
-                                                    <Stack spacing={0}>
-                                                        <Text size="md">Near</Text>
-                                                        <Text size="sm">NEAR</Text>
-                                                    </Stack>
-                                                </Group>
-                                                <Text sx={theme => ({
-                                                    background: getTheme(theme) ? theme.colors.dark[3] : theme.colors.gray[3],
-                                                    borderRadius: theme.radius.sm,
-                                                    padding: '2px 4px',
-                                                })}>${tokenPrice}</Text>
-                                            </Group>
-                                        </Paper>
+
+                                        <TokenPreview offerDetails={offerDetails} tokenPrice={tokenPrice} />
+                                        
                                         <OfferDetail obj={{
                                             title: "Minimum Amount",
                                             value: getReadableTokenBalance(offerDetails?.min_amount, 24),
@@ -702,4 +688,4 @@ const TradeChat = () => {
     )
 }
 
-export default TradeChat
+export default TokenChat

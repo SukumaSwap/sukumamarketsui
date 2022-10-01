@@ -62,12 +62,12 @@ const dashboard_links = [
     icon: <IconHome size={16} />,
     description: null,
   },
-  {
-    to: './trade-chats',
-    label: 'Trade Chats',
-    icon: <IconMessage size={16} />,
-    description: null,
-  },
+  // {
+  //   to: './trade-chats',
+  //   label: 'Trade Chats',
+  //   icon: <IconMessage size={16} />,
+  //   description: null,
+  // },
   {
     to: './community/chats',
     label: 'Community',

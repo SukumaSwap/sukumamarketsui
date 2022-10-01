@@ -2,9 +2,12 @@ import { Carousel } from '@mantine/carousel'
 import { ActionIcon, Avatar, Box, Center, Grid, Group, Paper, Stack, Text, Title } from '@mantine/core'
 import { IconArrowBack, IconCoin, IconCoinBitcoin, IconThumbDown, IconThumbUp } from '@tabler/icons'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { getTextCount, getTheme, greenGradientBg } from '../../../../app/appFunctions'
 import GoBackButton from '../../../../components/common/GoBackButton'
+import { useState } from 'react';
+import { CONTRACT } from '../../../../app/appconfig'
 
 const AccountStat = ({ title, value }) => {
   return (
@@ -22,7 +25,25 @@ const AccountStat = ({ title, value }) => {
 }
 
 const UserAccount = () => {
-  
+  const [acc, setAcc] = useState(null)
+  const { account_id } = useParams()
+
+  const loadAccount = () => {
+    const contract = window.contract
+    const wallet = window.walletConnection
+    if (contract && wallet) {
+      wallet.account().viewFunction(CONTRACT, "acc_pub_info", { "account_id": account_id }).then(res => {
+        setAcc(res)
+      }).catch(err => {
+        console.log("Fetching offers error", err)
+      })
+    }
+  }
+
+  useEffect(() => {
+    loadAccount()
+  }, [])
+
   return (
     <div>
       <GoBackButton />
@@ -48,7 +69,7 @@ const UserAccount = () => {
                 height: "100%"
               }}>
                 <Text color="dark" weight={700}>
-                  {getTextCount("dalmasonto.testnet", 20)}
+                  {getTextCount(acc?.id || "", 20)}
                 </Text>
               </Center>
             </Grid.Col>
@@ -59,11 +80,11 @@ const UserAccount = () => {
                 <Group>
                   <Group >
                     <IconThumbUp color='green' />
-                    <Text color="dark">102</Text>
+                    <Text color="dark">{acc?.likes}</Text>
                   </Group>
                   <Group >
                     <IconThumbDown color='red' />
-                    <Text color="dark">102</Text>
+                    <Text color="dark">{acc?.dislikes}</Text>
                   </Group>
                 </Group>
               </Center>
@@ -73,31 +94,28 @@ const UserAccount = () => {
                 height: "100%"
               }}>
                 <Text color="dark">
-                  Trades: 20
+                  Trades: {acc?.trades}
                 </Text>
               </Center>
             </Grid.Col>
           </Grid>
           <Title order={2} color="dark">Bio</Title>
           <Text color="dark">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-            Reiciendis quos quasi dignissimos corporis quibusdam, 
-            aliquam voluptate tempora voluptates aut sequi fugiat 
-            doloribus minima consectetur facilis et porro labore! Dolore, ipsam?
+            [_NOTHING_]
           </Text>
         </Paper>
       </section>
       <section>
         <Title order={2} my="md">Account Statistics</Title>
         <Grid>
-          <AccountStat title="Trades" value="12" />
-          <AccountStat title="Transfers" value="54" />
-          <AccountStat title="Offers" value="34" />
-          <AccountStat title="Active Offers" value="32" />
-          <AccountStat title="Partners" value="56" />
-          <AccountStat title="Positive Feedback" value="234" />
-          <AccountStat title="Negative Feedback" value="43" />
-          <AccountStat title="Blocked By" value="4" />
+          <AccountStat title="Trades" value={acc?.trades} />
+          <AccountStat title="Transfers" value={acc?.transfers} />
+          <AccountStat title="Offers" value={acc?.offers} />
+          <AccountStat title="Active Offers" value={acc?.offers} />
+          <AccountStat title="Partners" value="0" />
+          <AccountStat title="Positive Feedback" value={acc?.likes} />
+          <AccountStat title="Negative Feedback" value={acc?.dislikes} />
+          <AccountStat title="Blocked By" value={acc?.blocked_by} />
           <AccountStat title="Wallet Age (years)" value="0.1" />
         </Grid>
       </section>

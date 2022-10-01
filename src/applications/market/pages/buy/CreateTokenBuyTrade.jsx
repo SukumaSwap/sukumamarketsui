@@ -12,6 +12,7 @@ import { CONTRACT } from '../../../../app/appconfig';
 import { nanoid } from 'nanoid'
 
 import { db, doc, setDoc } from '../../../../app/firebaseconfig';
+import TokenPreview from './TokenPreview';
 
 
 const OfferDetail = ({ obj }) => {
@@ -366,25 +367,7 @@ const CreateTokenBuyTrade = () => {
                                         background: getTheme(theme) ? theme.colors.dark[4] : theme.colors.gray[0]
                                     })}>
                                         <Title order={3}>Offer Details</Title>
-                                        <Paper p="xs" radius="md" my="sm" sx={theme => ({
-                                            background: getTheme(theme) ? theme.colors.dark[8] : theme.colors.gray[2]
-                                        })}>
-                                            <Group position='apart'>
-                                                <Group>
-                                                    <Avatar src={offerDetails?.token?.icon} />
-                                                    <Stack spacing={0}>
-                                                        <Text size="md">{offerDetails?.token?.name}</Text>
-                                                        <Text size="xs">{offerDetails?.token?.address}</Text>
-                                                        <Text size="sm">{offerDetails?.token?.symbol}</Text>
-                                                    </Stack>
-                                                </Group>
-                                                <Text sx={theme => ({
-                                                    background: getTheme(theme) ? theme.colors.dark[3] : theme.colors.gray[3],
-                                                    borderRadius: theme.radius.sm,
-                                                    padding: '2px 4px',
-                                                })}>${tokenPrice}</Text>
-                                            </Group>
-                                        </Paper>
+                                        <TokenPreview offerDetails={offerDetails} tokenPrice={tokenPrice} />
                                         <OfferDetail obj={{
                                             title: "Minimum Amount",
                                             value: getReadableTokenBalance(offerDetails?.min_amount, offerDetails?.token?.decimals),

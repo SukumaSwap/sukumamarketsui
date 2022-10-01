@@ -33,6 +33,7 @@ const CONTRACT_TOKEN_CHANGE_METHODS = [
   "add_token_buy_chat",
   "add_token_sell_chat",
   "get_token_chat",
+  "pub_get_token_chat",
   "mark_token_as_paid",
   "mark_token_as_received",
   "remove_token_chat",
