@@ -29,6 +29,8 @@ import { showNotification } from '@mantine/notifications';
 import Sell from './applications/market/pages/sell/Sell';
 import CreateTokenBuyTrade from './applications/market/pages/buy/CreateTokenBuyTrade';
 import TokenChat from './applications/market/pages/chats/TokenChat';
+import CreateSellTrade from './applications/market/pages/sell/CreateSellTrade';
+import CreateTokenSellTrade from './applications/market/pages/sell/CreateTokenSellTrade';
 
 
 const MainHome = () => {
@@ -93,7 +95,8 @@ function App() {
             <Route path="buy/create-buy-trade/asset/:offer_id/" element={<CreateTokenBuyTrade />} />
 
             <Route path="sell" element={<Sell />} />
-            <Route path="sell/create-sell-trade/:offer_id/" element={<CreateBuyTrade />} />
+            <Route path="sell/create-sell-trade/:offer_id/" element={<CreateSellTrade />} />
+            <Route path="sell/create-sell-trade/asset/:offer_id/" element={<CreateTokenSellTrade />} />
 
             <Route path="chats/:chat_id/" element={<TradeChat />} />
             <Route path="chats/token/:chat_id/" element={<TokenChat />} />

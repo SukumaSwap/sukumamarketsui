@@ -11,7 +11,7 @@ const Home = () => {
                 height: '100vh'
             }}>
                 <Stack>
-                    <Title>Sukama Markets</Title>
+                    <Title>Sukuma Markets</Title>
                     <CustomNavLink navlink={{
                         to: './market',
                         label: 'Get Started',

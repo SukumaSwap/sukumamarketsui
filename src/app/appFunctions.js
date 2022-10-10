@@ -33,15 +33,18 @@ const greenGradientBg = (theme) => {
 }
 
 const formatNumber = (num) => {
-  return new Number(num).toLocaleString('en-US', {minimumFractionDigits: 2})
+  return new Number(num).toLocaleString('en-US', { minimumFractionDigits: 2 })
 }
 
 
-export const convertNstoTime = (nanoseconds) => {
+export const convertNstoTime = (nanoseconds, full) => {
   if (nanoseconds) {
     const millis = parseInt((nanoseconds / 1000000))
     const time = new Date(millis)
-    return time.toDateString() + " " + time.toLocaleTimeString()
+    if (!full) {
+      return time.toDateString() + " " + time.toLocaleTimeString()
+    }
+    return time.toDateString()
   }
   return "-"
 }

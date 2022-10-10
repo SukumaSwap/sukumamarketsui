@@ -215,7 +215,7 @@ const DepositModal = () => {
         if (!wallet) {
             return
         }
-        else {
+        else if(wallet?.getAccountId()) {
             const res = await fetch(
                 `https://testnet-api.kitwallet.app/account/${wallet.getAccountId()}/likelyTokens`,
                 {
