@@ -10,98 +10,6 @@ import { getReadableTokenBalance } from '../../../../app/nearutils';
 import NearChatRow from './NearChatRow';
 import TokenChatRow from './TokenChatRow';
 
-const offers = [
-    {
-        id: "offer-1",
-        offerer: 'dalmasonto.testnet',
-        max: '140',
-        min: '30',
-        token: {
-            title: 'Near',
-            icon: '',
-            asset: 'near',
-        },
-        payment: {
-            id: "bank",
-            title: "Bank",
-            icon: ''
-        },
-        currency: 'KES',
-        rate: -1
-    },
-    {
-        id: "offer-2",
-        offerer: 'dalmasonto.testnet',
-        max: '100',
-        min: '30',
-        token: {
-            title: 'Near',
-            icon: '',
-            asset: 'near',
-        },
-        payment: {
-            id: "m-pesa",
-            title: "M-Pesa",
-            icon: ''
-        },
-        currency: 'KES',
-        rate: -1
-    }
-]
-
-const paymentMethods = [
-    {
-        icon: "",
-        label: "M-Pesa",
-        value: "m-pesa",
-        symbol: null
-    }
-]
-
-const currencies = [
-    {
-        icon: "",
-        label: "KES",
-        value: "kes",
-        symbol: null
-    }
-]
-
-
-const PaymentSelect = forwardRef((props, ref) => (
-    <div ref={ref} {...props}>
-        <Group noWrap>
-            <Avatar src={props.icon} size="sm" className='text-capitalize'>{props.label && props.label[0]}</Avatar>
-            <div>
-                <Text size="sm">{props.label}</Text>
-                {props.symbol &&
-                    <Text size="xs" color="dimmed">
-                        {props.symbol} - <small>{props.address}</small>
-                    </Text>
-                }
-            </div>
-        </Group>
-    </div>
-));
-
-
-const Asset = ({ }) => {
-    return (
-        <Group sx={theme => ({
-            border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.gray[6] : theme.colors.gray[5]}`,
-            borderRadius: theme.radius.md,
-            padding: '2px 4px',
-            cursor: "pointer",
-            ":hover": {
-
-            }
-        })}>
-            <Avatar />
-            <Text>Near</Text>
-        </Group>
-    )
-}
-
 const tableHeaders = [
     {
         value: 'offer_id',
@@ -115,7 +23,7 @@ const tableHeaders = [
     },
     {
         value: 'chat',
-        label: 'Chat',
+        label: 'Trade',
         show: true
     },
     {
@@ -126,7 +34,7 @@ const tableHeaders = [
     {
         value: 'owner',
         label: 'Chat Creator',
-        show: true
+        show: false
     },
     {
         value: 'offerer',
@@ -171,7 +79,7 @@ const tableHeaders = [
     {
         value: 'released',
         label: 'Released',
-        show: false
+        show: true
     },
     {
         value: 'payer_has_rated',
@@ -194,31 +102,6 @@ const tableHeaders = [
         show: false
     },
 ]
-
-const trades = [
-    {
-        id: "someid",
-        offer_id: 'offer_id',
-        message: "dalmasonto.testnet to pay alexmatu.testnet kes 3000 for 2.14 Near",
-        token: 'wrap.testnet',
-        owner: 'alexmatu.testnet',
-        offerer: 'near',
-        amount: 3232423432,
-        active: false,
-        payer: 'dalmasonto.testner',
-        receiver: 'alexmatu.testnet',
-        paid: true,
-        received: false,
-        canceled: true,
-        released: false,
-        payer_has_rated: false,
-        receiver_has_rated: false,
-        started_at: 42434324,
-        ended_at: 424243243
-    }
-]
-
-
 
 const SelectTableHeaders = ({ headers, selectHeader }) => {
     return (
@@ -277,7 +160,7 @@ const TradeChats = () => {
         return headers.find(header => header.value === value)
     }
 
-    const rows = chats.map((obj, index) => (
+    const rows = chats?.sort((a, b) => b.started_at - a.started_at).map((obj, index) => (
         <NearChatRow key={`near_chat_row_${index}`} obj={obj} getHeader={getHeader} />
     ))
     const tokenrows = tokenChats.map((obj, index) => (
@@ -296,12 +179,10 @@ const TradeChats = () => {
 
     const loadChats = () => {
         setLoading(true)
-        console.log("loading chats")
         const contract = window.contract
         const wallet = window.walletConnection
         if (contract && wallet) {
             wallet.account().viewFunction(CONTRACT, "get_account_chats", { account_id: wallet.getAccountId() }).then(res => {
-                console.log("have been reached", res)
                 if (typeof res === 'object') {
                     setChats(res)
                 }

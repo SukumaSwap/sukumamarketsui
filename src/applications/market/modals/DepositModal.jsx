@@ -248,8 +248,9 @@ const DepositModal = () => {
     return (
         <>
             <Button radius="xl" style={{
-                height: '44px'
-            }} variant="outline" color="gray.4" onClick={e => setOpen(true)}>
+                height: '44px',
+                color: getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]
+            }} variant="outline"  onClick={e => setOpen(true)}>
                 <Group>
                     <>Deposit</>
                     <IconArrowBarUp size={18} />

@@ -58,8 +58,8 @@ const TokenChatRow = ({ obj, getHeader }) => {
                 getHeader("chat")?.show && (
                     <td>
                         <Button radius="xl" color="green" rightIcon={<IconMessageDots size={16} />} style={{
-                            width: "120px"
-                        }} onClick={e => goTo(`/market/chats/token/${obj.id}/`)}>Go to Chat</Button>
+                            width: "130px"
+                        }} onClick={e => goTo(`/market/chats/token/${obj.id}/`)}>Go to Trade</Button>
                     </td>
                 )
             }

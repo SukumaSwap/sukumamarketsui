@@ -2,16 +2,20 @@ import React, { useState } from 'react'
 import { Button, Group, Modal, Paper, Stepper, Text, TextInput, Title, NumberInput, ScrollArea, Center, Stack } from '@mantine/core';
 import { IconArrowForward, IconArrowBack, IconCurrencyDollar, IconArrowBarDown } from '@tabler/icons';
 import { getTheme } from '../../../app/appFunctions';
+import { useMantineTheme } from '@mantine/core';
 
 const WithdrawModal = () => {
     const [open, setOpen] = useState(false)
     const [step, setStep] = useState(0)
     const [amount, setAmount] = useState(0)
+
+    const theme = useMantineTheme()
     return (
         <>
             <Button radius="xl" style={{
-                height: '44px'
-            }} variant="outline" color="gray.4" onClick={e => setOpen(true)}>
+                height: '44px',
+                color: getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]
+            }} variant="outline" onClick={e => setOpen(true)}>
                 <Group>
                     <>Withdraw</>
                     <IconArrowBarDown size={18} />
