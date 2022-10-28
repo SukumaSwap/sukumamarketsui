@@ -30,6 +30,7 @@
     "moment": "^2.29.3",
     "near-api-js": "^0.45.1",
     "qrcode": "^1.5.0",
+    "randomcolor": "^0.6.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-flip-move": "^3.0.4",

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Carousel } from '@mantine/carousel'
-import { ActionIcon, Avatar, Box, Center, Grid, Group, Paper, Stack, Text, Title, Transition } from '@mantine/core'
+import { ActionIcon, Avatar, Box, Center, Grid, Group, Paper, Stack, Text, Title, Transition, useMantineTheme } from '@mantine/core'
 import { useHover } from '@mantine/hooks'
 import { IconCoin, IconCoinBitcoin } from '@tabler/icons'
 import { CONTRACT, NEAR_OBJECT } from '../../../app/appconfig'
@@ -12,6 +12,8 @@ const AssetBalance = ({ asset, balance }) => {
 
     const [tokenDetails, setTokenDetails] = useState(null)
     const [tokenPrice, setTokenPrice] = useState(null)
+
+    const theme = useMantineTheme()
 
     const loadDetails = () => {
         if (asset === "near") {
@@ -79,35 +81,43 @@ const AssetBalance = ({ asset, balance }) => {
                 }
             },
         })}>
-            <Center className='view-details'>
-                <Stack spacing={16} align="center" >
-                    <Avatar src={tokenDetails?.icon} />
-                    <Text>
-                        {getReadableTokenBalance(balance, tokenDetails?.decimals || 0)}
-                        &nbsp;
-                        {tokenDetails?.symbol}
-                    </Text>
-                </Stack>
-            </Center>
-            <Center className='more-details'>
-                <Stack spacing={0} align="center" >
-                    <Avatar src={tokenDetails?.icon} />
-                    <Text color="dark">
-                        {tokenDetails?.name}
-                    </Text>
-                    <Box p="0" sx={theme => ({
-                        background: theme.colors.gray[2],
-                        borderRadius: theme.radius.sm,
-                        padding: '0px 4px !important',
-                        color: "dark"
-                    })}>
-                        <Text color="dark" style={{ padding: '0px !important' }}>
-                            ${tokenPrice}
-                        </Text>
-                    </Box>
-                    <Text color="dark">${getUSD(tokenPrice, getReadableTokenBalance(balance, tokenDetails?.decimals || 0))}</Text>
-                </Stack>
-            </Center>
+            <Transition mounted={!hovered} transition="slide-down" duration={400} timingFunction="ease">
+                {(styles) => <div style={styles} className="h-100">
+                    <Center className='h-100'>
+                        <Stack spacing={16} align="center" >
+                            <Avatar src={tokenDetails?.icon} />
+                            <Text>
+                                {getReadableTokenBalance(balance, tokenDetails?.decimals || 0)}
+                                &nbsp;
+                                {tokenDetails?.symbol}
+                            </Text>
+                        </Stack>
+                    </Center>
+                </div>}
+            </Transition>
+
+            <Transition mounted={hovered} transition="slide-up" duration={400} timingFunction="ease">
+                {(styles) => <div style={styles} className="h-100">
+                    <Center className='h-100'>
+                        <Stack spacing={0} align="center" >
+                            <Avatar src={tokenDetails?.icon} alt={`${tokenDetails?.name} asset`} />
+                            <Text color="dark">
+                                {tokenDetails?.name}
+                            </Text>
+                            <Box p="0" sx={theme => ({
+                                background: theme.colors.gray[2],
+                                borderRadius: theme.radius.sm,
+                                padding: '0px 4px !important',
+                            })}>
+                                <Text color={`${getTheme(theme) ? 'gray[1]' : 'dark[6]'}`} style={{ padding: '0px !important' }}>
+                                    ${tokenPrice}
+                                </Text>
+                            </Box>
+                            <Text color="dark">${getUSD(tokenPrice, getReadableTokenBalance(balance, tokenDetails?.decimals || 0))}</Text>
+                        </Stack>
+                    </Center>
+                </div>}
+            </Transition>
         </Paper>
     )
 }
@@ -147,11 +157,9 @@ const NearDashboard = () => {
         loadAccount()
     }, [])
 
-    console.log(acc)
-
     return (
         <div>
-            <section>
+            <Box pt="xl">
                 <Title order={2} mb="md">Token Balances</Title>
                 <Paper px="md" py="lg" radius="md" sx={theme => ({
                     background: theme.fn.linearGradient(45, theme.colors.green[1], theme.colors.green[3], theme.colors.green[1])
@@ -167,12 +175,12 @@ const NearDashboard = () => {
                                     <AssetBalance asset={token?.tokenId} balance={token?.balance} />
                                 </Carousel.Slide>
                             ))
-                        }
+                        } 
                     </Carousel>
 
                 </Paper>
-            </section>
-            <section>
+            </Box>
+            <Box pb="xl">
                 <Title order={2} my="md">Account Statistics</Title>
                 <Grid>
                     <AccountStat title="Trades" value={acc?.info?.trades} />
@@ -185,7 +193,7 @@ const NearDashboard = () => {
                     <AccountStat title="Blocked By" value={acc?.info?.blocked_by} />
                     <AccountStat title="Wallet Age (years)" value={convertNstoTime(acc?.info?.created_on, true)} />
                 </Grid>
-            </section>
+            </Box>
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import { Avatar, Button, Group, Paper, Popover, ScrollArea, Table, Text, NavLink, Title, Checkbox } from '@mantine/core'
+import { Avatar, Button, Group, Paper, Popover, ScrollArea, Table, Text, NavLink, Title, Checkbox, Divider, Switch } from '@mantine/core'
 import React, { forwardRef, useState } from 'react'
 import { convertNstoTime, getTextCount, getTheme } from '../../../../app/appFunctions';
 import { IconCheck, IconChevronDown, IconMessageDots, IconX } from '@tabler/icons';
@@ -103,7 +103,40 @@ const tableHeaders = [
     },
 ]
 
-const SelectTableHeaders = ({ headers, selectHeader }) => {
+const tradesSettings = [
+    {
+        id: "asset_type",
+        value: "all",
+        label: "All Assets",
+        active: true
+    },
+    {
+        id: "asset_type",
+        value: "near",
+        label: "Near",
+        active: true
+    },
+    {
+        id: "asset_type",
+        value: "others",
+        label: "Other Assets",
+        active: true
+    },
+    {
+        id: "trade_status",
+        value: "active",
+        label: "Active",
+        active: true
+    },
+    {
+        id: "trade_status",
+        value: "inactive",
+        label: "Inactive",
+        active: false
+    }
+]
+
+const SelectTableHeaders = ({ headers, selectHeader, settings, setSetting }) => {
     return (
         <Popover width={250} position="bottom" withArrow shadow="md" radius="md">
             <Popover.Target>
@@ -116,6 +149,39 @@ const SelectTableHeaders = ({ headers, selectHeader }) => {
                     <Paper px="sm" style={{
                         background: "transparent"
                     }} >
+                        <Text>Trades settings</Text>
+                        {
+                            tradesSettings.map((setting, index) => (
+                                <Group key={setting.value} position='apart' sx={theme => ({
+                                    width: "100% !important",
+                                    background: getTheme(theme) ? theme.colors.dark[4] : theme.colors.gray[2],
+                                    borderRadius: theme.radius.md,
+                                    padding: '6px 16px',
+                                    margin: "10px 0",
+                                    cursor: "pointer"
+                                })} onClick={e => {
+                                    if(setting.id === 'asset_type'){
+                                        setSetting("asset_type", setting.value)
+                                    }
+                                    else{
+                                        setSetting("trade_status", setting.active)
+                                    }
+                                }}>
+                                    <Text>{setting.label}</Text>
+                                    {
+                                        setting.id === 'asset_type' && 
+                                        <Switch checked={settings["asset_type"] === setting.value} readOnly />
+                                    }
+                                    {
+                                        setting.id === 'trade_status' && 
+                                        <Switch checked={settings["trade_status"] === setting.active} readOnly />
+                                    }
+                                </Group>
+                            ))
+                        }
+                        
+                        <Divider my="md" />
+                        <Text>Table settings</Text>
                         {
                             headers.map((header, index) => (
 
@@ -145,6 +211,10 @@ const SelectTableHeaders = ({ headers, selectHeader }) => {
 const TradeChats = () => {
 
     const [headers, setHeaders] = useState(tableHeaders)
+    const [settings, setSettings] = useState({
+        asset_type: "all",
+        trade_status: true
+    })
 
     const [loading, setLoading] = useState(false)
     const [chats, setChats] = useState([])
@@ -160,10 +230,10 @@ const TradeChats = () => {
         return headers.find(header => header.value === value)
     }
 
-    const rows = chats?.sort((a, b) => b.started_at - a.started_at).map((obj, index) => (
+    const rows = chats?.filter(obj => obj?.active === settings?.trade_status).sort((a, b) => b.started_at - a.started_at).map((obj, index) => (
         <NearChatRow key={`near_chat_row_${index}`} obj={obj} getHeader={getHeader} />
     ))
-    const tokenrows = tokenChats.map((obj, index) => (
+    const tokenrows = tokenChats?.filter(obj => obj?.active === settings?.trade_status).map((obj, index) => (
         <TokenChatRow key={`token_chat_row_${index}`} obj={obj} getHeader={getHeader} />
     ))
 
@@ -175,6 +245,12 @@ const TradeChats = () => {
             }
         })
         setHeaders(headers_)
+    }
+
+    const setSetting = (id, value) => {
+        const settings_ = {...settings}
+        settings_[id] = value
+        setSettings(settings_)
     }
 
     const loadChats = () => {
@@ -225,7 +301,7 @@ const TradeChats = () => {
 
             <Group position='apart' px="md" mb="md">
                 <Title>Trade</Title>
-                <SelectTableHeaders headers={headers} selectHeader={selectHeader} />
+                <SelectTableHeaders headers={headers} selectHeader={selectHeader} settings={settings} setSetting={setSetting} />
             </Group>
 
             <Paper py="md" radius="lg" px="sm" sx={theme => ({
@@ -252,8 +328,18 @@ const TradeChats = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {rows}
+                            {
+                                settings?.asset_type === "all" && <>
+                                {rows}
                             {tokenrows}
+                                </>
+                            }
+                            {
+                                settings?.asset_type === "near" && rows
+                            }
+                            {
+                                settings?.asset_type === "others" && tokenrows
+                            }
                         </tbody>
                     </Table>
                 </ScrollArea>

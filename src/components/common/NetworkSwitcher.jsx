@@ -16,6 +16,7 @@ const CustomText = ({ active, text, ...rest }) => {
 
 export const DrawerNetwork = ({ close, network }) => {
     const dispatch = useDispatch()
+    const network_ = useSelector(selectNetwork)
     const setNetwork_ = () => {
         dispatch(setNetwork(network))
         close && close()
@@ -25,7 +26,10 @@ export const DrawerNetwork = ({ close, network }) => {
             background: theme.colorScheme === 'dark' ? !network.active ? theme.colors.dark[5] : theme.colors.dark[4] : !network.active ? theme.colors.gray[1] : theme.colors.gray[2],
             borderRadius: theme.radius.md,
             height: 64,
-            cursor: network.active ? "pointer" : "not-allowed"
+            cursor: network.active ? "pointer" : "not-allowed",
+            borderWidth: "2px",
+            borderStyle: "solid",
+            borderColor: network_?.network_id === network.network_id ? theme.colors.green[6] : "transparent"
         })} onClick={setNetwork_}>
             <Group position='apart'>
                 <Avatar size="md" src={network.icon} />
@@ -39,6 +43,7 @@ export const DrawerNetwork = ({ close, network }) => {
 }
 
 export const MenuNetwork = ({ network }) => {
+    const network_ = useSelector(selectNetwork)
     const dispatch = useDispatch()
     const setNetwork_ = () => {
         dispatch(setNetwork(network))
@@ -48,6 +53,9 @@ export const MenuNetwork = ({ network }) => {
             background: theme.colorScheme === 'dark' ? !network.active ? theme.colors.dark[5] : theme.colors.dark[4] : !network.active ? theme.colors.gray[1] : theme.colors.gray[2],
             borderRadius: theme.radius.md,
             // height: 64
+            borderWidth: "2px",
+            borderStyle: "solid",
+            borderColor: network_?.network_id === network.network_id ? theme.colors.green[6] : "transparent"
         })} onClick={setNetwork_}>
             <Group position='apart'>
                 <Avatar size="md" src={network.icon} />

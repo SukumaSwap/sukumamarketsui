@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { selectNetwork } from '../../features/app/appSlice';
 import { showNotification } from '@mantine/notifications';
 import { useMantineTheme } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
 
 function ConnectWalletButton() {
     const network = useSelector(selectNetwork)
@@ -61,6 +62,10 @@ function SmConnectWalletButton() {
 
 function AccountButton() {
     let acc = window.walletConnection.getAccountId()
+    const navigate = useNavigate()
+    const goTo = (url) => {
+        navigate(url)
+    }
     return (
         <Menu shadow="md" width={230} radius="lg">
             <Menu.Target>
@@ -88,7 +93,7 @@ function AccountButton() {
                     background: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[1],
                     borderRadius: theme.radius.md,
                     height: 50
-                })} px="xl" mb="xs">
+                })} px="xl" mb="xs" onClick={e => goTo("/market")}>
                     <Group position='center'>
                         <IconUser />
                         <Text>Profile</Text>

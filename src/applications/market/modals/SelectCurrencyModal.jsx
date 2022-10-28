@@ -1,26 +1,35 @@
 import { useState } from 'react';
 
-import { getTheme } from "../../../app/appFunctions"
+import { getCurrencies, getTextCount, getTheme } from "../../../app/appFunctions"
 
 import { Modal, Box, Group, Title, ActionIcon, Divider, TextInput, Paper, Avatar, Stack, Text, ScrollArea } from "@mantine/core"
 
 
 import { IconX } from "@tabler/icons"
 import { Carousel } from "@mantine/carousel"
-import { NEAR_OBJECT, NETWORKS } from "../../../app/appconfig"
+import { CURRENCIES, NEAR_OBJECT, NETWORKS } from "../../../app/appconfig"
+import { useDebouncedValue, useMediaQuery } from '@mantine/hooks';
 
-const SelectTokenModal = ({ tokens, select, open, closeModal, selectedToken }) => {
-    const [searchedToken, setSearchedToken] = useState("")
-    const filterTokens = () => {
-        const filteredTokens = tokens?.filter(token => {
-            const regex = new RegExp(searchedToken, 'gi');
-            return token.symbol.match(regex) || token.name.match(regex) || token.address.match(regex)
+import FlipMove from 'react-flip-move';
+
+
+const SelectCurrencyModal = ({ select, open, closeModal, selected }) => {
+
+    const objs = CURRENCIES;
+
+    const [searchedTerm, setSearchedTerm] = useState("")
+    const [debounced] = useDebouncedValue(searchedTerm, 500);
+
+    const filteredObjs = () => {
+        const filtered = objs?.filter(obj => {
+            const regex = new RegExp(debounced, 'gi');
+            return obj.symbol.match(regex) || obj.name.match(regex)
         })
-        return filteredTokens
+        return filtered
     }
 
-    const selectSingle = (token) => {
-        select(token);
+    const selectSingle = (obj) => {
+        select(obj);
         closeModal && closeModal();
     }
 
@@ -51,15 +60,15 @@ const SelectTokenModal = ({ tokens, select, open, closeModal, selectedToken }) =
                         height: "60px",
                     },
                     ".custom-body": {
-                        height: "calc(100%)",
+                        height: "calc(100% - 60px)",
                         overflow: "hidden !important",
                         // background: "redimport { Carousel } from '@mantine/carousel';
                     }
                 })}>
             <Box className='custom-h' p="md">
                 <Group position='apart'>
-                    <Title order={2}>Select Token</Title>
-                    <ActionIcon  onClick={() => closeModal && closeModal(false)}>
+                    <Title order={2}>Select Currency</Title>
+                    <ActionIcon onClick={() => closeModal && closeModal(false)}>
                         <IconX />
                     </ActionIcon>
                 </Group>
@@ -67,9 +76,9 @@ const SelectTokenModal = ({ tokens, select, open, closeModal, selectedToken }) =
             <Divider />
             <Box className='custom-body' py="xs">
                 <Box px="md" style={{ height: "150px", background: "rd" }}>
-                    <TextInput value={searchedToken} onChange={e => setSearchedToken(e.target.value)}
+                    <TextInput value={searchedTerm} onChange={e => setSearchedTerm(e.target.value)}
                         size='md' radius="lg"
-                        placeholder="Search name, symbol or paste address"
+                        placeholder="Search name or symbol"
                         className='w-100' mb="md"
                         sx={theme => ({
                             ".mantine-TextInput-input": {
@@ -78,16 +87,12 @@ const SelectTokenModal = ({ tokens, select, open, closeModal, selectedToken }) =
                                 borderColor: theme.colors.pink[6],
                             }
                         })} />
-                    <Title order={5} mb="xs">Common tokens</Title>
-                    <Carousel slideGap={10} align="start">
-
-                        <Carousel.Slide size={100}>
-                            <SelectAssetBtn asset={NEAR_OBJECT} select={selectSingle} selectedToken={selectedToken} />
-                        </Carousel.Slide>
+                    <Title order={5} mb="xs">Common currencies</Title>
+                    <Carousel slideGap={10} align="start" slideSize="40%">
                         {
-                            tokens?.slice(0, 3).map((item, i) => (
-                                <Carousel.Slide key={`token_s_${i}`} size={100}>
-                                    <SelectAssetBtn asset={item} select={selectSingle} selectedToken={selectedToken} />
+                            getCurrencies(["KES", "USD", "EUR"]).map((item, i) => (
+                                <Carousel.Slide key={`token_s_${i}`} style={{ overflow: "hidden" }}>
+                                    <SelectAssetBtn asset={item} select={selectSingle} selected={selected} />
                                 </Carousel.Slide>
                             ))
                         }
@@ -95,11 +100,15 @@ const SelectTokenModal = ({ tokens, select, open, closeModal, selectedToken }) =
                 </Box>
                 <ScrollArea style={{ height: "calc(100% - 150px)", background: "yellw" }}>
                     <Paper py="xs">
-                        {
-                            filterTokens()?.map((item, i) => (
-                                <SelectAsset key={`dfd_${i}`} asset={item} select={selectSingle} selectedToken={selectedToken} />
-                            ))
-                        }
+                        <FlipMove>
+                            {
+                                filteredObjs()?.map((item, i) => (
+                                    <div key={`dfd_${item.symbol}_${i}`}>
+                                        <SelectAsset asset={item} select={selectSingle} selected={selected} />
+                                    </div>
+                                ))
+                            }
+                        </FlipMove>
                     </Paper>
                 </ScrollArea>
             </Box>
@@ -108,46 +117,56 @@ const SelectTokenModal = ({ tokens, select, open, closeModal, selectedToken }) =
 }
 
 
-const SelectAsset = ({ asset, select, selectedToken }) => {
+const SelectAsset = ({ asset, select, selected }) => {
     return (
         <Paper mb="xs" px="md" sx={theme => ({
-            background:  selectedToken?.address === asset?.address ? getTheme(theme) ? theme.colors.dark[6] : theme.colors.gray[1] : "transparent",
+            background: selected?.symbol === asset?.symbol ? getTheme(theme) ? theme.colors.dark[6] : theme.colors.gray[1] : "transparent",
             cursor: "pointer",
-            pointerEvents: selectedToken?.address === asset?.address ? "none" : "all",
+            pointerEvents: selected?.symbol === asset?.symbol ? "none" : "all",
             ":hover": {
                 background: getTheme(theme) ? theme.colors.dark[4] : theme.colors.gray[1]
             }
         })} onClick={e => select(asset)}>
             <Group>
-                <Avatar size="sm" src={asset?.icon} />
+                <Avatar size="md" radius="xl" sx={theme => ({
+                    background: theme.fn.linearGradient(45, 'red', 'blue'),
+                    ".mantine-Avatar-placeholder": {
+                        background: "transparent"
+                    }
+                })}>{asset?.symbol}</Avatar>
                 <Stack spacing={-10}>
-                    {/* <Title order={6} size="xs">{NEAR_OBJECT.symbol}</Title> */}
                     <Text size="md"><b>${asset?.symbol}</b></Text>
                     <Text size="sm">{asset?.name}</Text>
                 </Stack>
             </Group>
-        </Paper>
+        </Paper >
     )
 }
 
-const SelectAssetBtn = ({ asset, select, selectedToken }) => {
+const SelectAssetBtn = ({ asset, select, selected }) => {
+    const matches = useMediaQuery('(max-width: 768px)');
     return (
         <Paper sx={theme => ({
-            background:  selectedToken?.address === asset?.address ? getTheme(theme) ? theme.colors.dark[6] : theme.colors.gray[1] : "transparent",
+            background: selected?.symbol === asset?.symbol ? getTheme(theme) ? theme.colors.dark[6] : theme.colors.gray[1] : "transparent",
             borderStyle: "solid",
             borderWidth: "1px",
             borderRadius: "10px",
             borderColor: getTheme(theme) ? theme.colors.dark[4] : theme.colors.gray[4],
-            pointerEvents: selectedToken?.address === asset?.address ? "none" : "all",
+            pointerEvents: selected?.symbol === asset?.symbol ? "none" : "all",
             padding: "4px 6px",
             cursor: "pointer"
         })} onClick={e => select(asset)}>
             <Group>
-                <Avatar size="sm" src={asset?.icon} />
-                <Text size="sm">{asset?.symbol}</Text>
+                <Avatar size="sm" sx={theme => ({
+                    background: theme.fn.linearGradient(45, 'red', 'blue'),
+                    ".mantine-Avatar-placeholder": {
+                        background: "transparent"
+                    }
+                })}>{asset?.symbol}</Avatar>
+                <Text size="sm">{getTextCount(asset?.name, matches ? 8 : 12)}</Text>
             </Group>
         </Paper>
     )
 }
 
-export default SelectTokenModal
+export default SelectCurrencyModal

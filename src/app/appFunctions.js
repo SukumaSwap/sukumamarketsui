@@ -1,3 +1,5 @@
+import { CURRENCIES } from "./appconfig";
+
 const validateUrl = (url) => {
   const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
@@ -47,6 +49,20 @@ export const convertNstoTime = (nanoseconds, full) => {
     return time.toDateString()
   }
   return "-"
+}
+
+export const getCurrency = (symbol) => {
+  return CURRENCIES.find(cur => cur.symbol === symbol)
+}
+
+export const getCurrencies = (symbols_array) => {
+  let currencies = []
+  symbols_array.forEach(s => {
+    let curr = CURRENCIES.find(cur => cur.symbol === s)
+    currencies.push(curr)
+  })
+
+  return currencies
 }
 
 

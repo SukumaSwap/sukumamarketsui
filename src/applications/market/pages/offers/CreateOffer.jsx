@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { APP_NAME } from '../../../../app/constants'
 import { BigNumber } from "bignumber.js"
 
-import { Group, Stepper, Text, Button as MButton, useMantineTheme, Loader, Button as MTButton, TextInput, Modal, Menu, Title, Alert, ActionIcon, Divider, Paper, Container, Grid, ScrollArea, Center, Stack, NumberInput, Select, Table, Avatar, Textarea } from '@mantine/core'
+import { Group, Stepper, Text, Button as MButton, useMantineTheme, Loader, Button as MTButton, TextInput, Modal, Menu, Title, Alert, ActionIcon, Divider, Paper, Container, Grid, ScrollArea, Center, Stack, NumberInput, Select, Table, Avatar, Textarea, Box } from '@mantine/core'
 import { nanoid } from 'nanoid'
 import { showNotification } from '@mantine/notifications'
+import { IconAlertCircle, IconArrowBack, IconArrowForward, IconArrowLeft, IconArrowRight, IconArrowUp, IconCheck, IconChevronLeft, IconCurrencyBitcoin, IconCurrencyDollar, IconUpload, IconX } from '@tabler/icons'
 
 import { useModals } from '@mantine/modals'
-import { getMessage, getTokenDetails, getTokenPrice } from '../../../../app/nearutils'
-import { PAYMENT_OPTIONS, WHITELISTEDTOKENS_, NEAR_OBJECT, CONTRACT } from '../../../../app/appconfig'
+import { getMessage } from '../../../../app/nearutils'
+import { PAYMENT_OPTIONS, WHITELISTEDTOKENS_, NEAR_OBJECT, CONTRACT, CURRENCIES } from '../../../../app/appconfig'
+import { APP_NAME } from '../../../../app/constants'
 import ImportTokenModal from '../../../../components/common/ImportToken';
-import { IconAlertCircle, IconArrowBack, IconArrowForward, IconArrowLeft, IconArrowRight, IconArrowUp, IconCheck, IconChevronLeft, IconCurrencyBitcoin, IconCurrencyDollar, IconUpload, IconX } from '@tabler/icons'
 import { getTheme } from '../../../../app/appFunctions'
 import GoBackButton from '../../../../components/common/GoBackButton';
+import RegisterContractModal from '../../modals/RegisterContractModal'
 
 const DataRow = ({ data }) => {
     return (
@@ -47,6 +48,8 @@ const CreateOffer = () => {
     const [tokens, setTokens] = useState([])
     const [currencies, setCurrencies] = useState([])
     const [payments, setPayments] = useState([])
+
+    const [FtAccountModal, setFtAccountModal] = useState(false)
 
     const [active, setActive] = useState(0);
     const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
@@ -145,7 +148,7 @@ const CreateOffer = () => {
             setLoading(false)
             return false
         }
-        
+
         return true
     }
 
@@ -154,7 +157,7 @@ const CreateOffer = () => {
         const id = nanoid() + Date.now()
         const min = new BigNumber(min_amt).multipliedBy(10 ** 24).toFixed()
         const max = new BigNumber(max_amt).multipliedBy(10 ** 24).toFixed()
-       
+
         contract.add_offer({
             id: id.toString(),
             offer_type: offerType,
@@ -192,7 +195,7 @@ const CreateOffer = () => {
         const offerer = window.walletConnection.getAccountId()
         const id = nanoid() + Date.now()
         let tokenDetails = tokens.find(token_ => token_.address === token)
-        
+
         if (tokenDetails) {
             const min = new BigNumber(min_amt).multipliedBy(10 ** tokenDetails.decimals).toFixed()
             const max = new BigNumber(max_amt).multipliedBy(10 ** tokenDetails.decimals).toFixed()
@@ -384,11 +387,18 @@ const CreateOffer = () => {
         getPayments()
     }, [])
 
+    console.log(currencies)
+
     return (
         <Container p="xs">
+
             <GoBackButton />
+
+            <RegisterContractModal token={token} />
+
             <Paper p="xs" radius="md" sx={theme => ({
-                background: getTheme(theme) ? theme.colors.dark[6] : theme.colors.gray[2]
+                background: getTheme(theme) ? theme.colors.dark[6] : theme.colors.gray[2],
+                // height: "300px"
             })}>
                 <div>
                     <title>{APP_NAME} | Offers - New offer</title>
@@ -484,6 +494,43 @@ const CreateOffer = () => {
                                                 onChange={value => setOfferRate(value)} placeholder="Offer Rate" />
                                         </Stack>
                                     </Center>
+                                </Paper>
+                            </Stepper.Step>
+                            <Stepper.Step label="Currency">
+                                <Paper radius="lg" px="xs" py="xs" style={{ height: "300px", overflow: "hidden" }}>
+                                    <Box style={{ height: "70px" }}>
+                                        <Title mb="sm" order={4} className="mb-3">Select currency</Title>
+                                        <Grid>
+                                            <Grid.Col xs={10}>
+                                                <TextInput radius="xl" value={searchedToken} onChange={e => setSearchedToken(e.target.value)} type="search" placeholder='Search by name | symbol' />
+                                            </Grid.Col>
+                                            <Grid.Col xs={2}>
+                                                <MTButton radius={"xl"} variant='filled' color='blue' onClick={e => setModalOpen(true)} leftIcon={<IconUpload size={16} />}>
+                                                    Import
+                                                </MTButton>
+                                            </Grid.Col>
+                                        </Grid>
+                                    </Box>
+                                    <ScrollArea style={{ height: "230px" }} py="sm">
+                                        <Grid>
+                                            {
+                                                CURRENCIES.map((cur, i) => {
+                                                    return (
+                                                        <Grid.Col md={3} key={`select_currency_${i}`} style={{overflow: "hidden"}}>
+                                                            <MButton  leftIcon={<b>{cur.symbol}</b>} height="24px" alt={cur.name} rightIcon={currency === cur.symbol && <IconCheck />}
+                                                                variant={currency === cur.symbol ? 'outline' : 'default'}
+                                                                color={currency === cur.symbol ? 'blue' : 'gray'}
+                                                                className="w-100"
+                                                                onClick={e => setCurrency(cur.symbol)} radius="lg" >
+                                                                <span className=''>{cur.name}</span>
+                                                            </MButton>
+                                                        </Grid.Col>
+                                                    )
+                                                })
+                                            }
+
+                                        </Grid>
+                                    </ScrollArea>
                                 </Paper>
                             </Stepper.Step>
                             <Stepper.Step label="Payment & Currency"  >

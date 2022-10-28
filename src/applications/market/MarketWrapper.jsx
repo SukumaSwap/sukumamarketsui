@@ -21,7 +21,7 @@ import {
   ScrollArea,
   Aside,
 } from '@mantine/core';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { AccountDrawer, NetworkDrawer, ThemeSwitcher } from '../../components/common/ThemeSwitcher';
 import CustomNavlink from '../../components/common/CustomNavlink';
 import { IconCopy, IconCopyright, IconHome, IconMessage, IconSocial, IconWriting } from '@tabler/icons';
@@ -31,6 +31,7 @@ import CustomNavbarLink from '../../components/common/CustomNavbarLink';
 import DepositModal from './modals/DepositModal';
 import WithdrawModal from './modals/WithdrawModal';
 import CustomNavLink from '../../components/common/CustomNavlink';
+import { getTheme } from '../../app/appFunctions';
 
 const getUrl = (path) => {
   return `./${path}`
@@ -213,7 +214,9 @@ export default function MarketWrapper({ children }) {
                   color={theme.colors.gray[6]}
                 />
               </MediaQuery>
-              <Title order={2}> Sukuma </Title>
+              <Link to="/" style={{color: getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[7], textDecoration: "none"}}>
+                <Title order={2}> Sukuma </Title>
+              </Link>
             </Group>
 
             <MediaQuery smallerThan="md" styles={{ display: 'none !important' }}>
@@ -230,8 +233,8 @@ export default function MarketWrapper({ children }) {
                 <Group>
                   <NetworkSwitcher />
                   {
-                      logged_in ? <AccountButton /> : <ConnectWalletButton />
-                    }
+                    logged_in ? <AccountButton /> : <ConnectWalletButton />
+                  }
                 </Group>
               </MediaQuery>
               <Group p="0">

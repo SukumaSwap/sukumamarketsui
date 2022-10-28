@@ -322,6 +322,8 @@ const Offers = () => {
         }
     }
 
+    console.log(offers)
+
     useMemo(() => {
         loadNearOffers()
     }, [])

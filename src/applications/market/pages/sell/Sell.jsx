@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useState } from 'react'
 import { Avatar, Button, Center, Grid, Group, Paper, Popover, ScrollArea, Table, TextInput, Text, Select, Stack, NavLink, useMantineTheme } from '@mantine/core'
-import { getTextCount, getTheme } from '../../../../app/appFunctions';
+import { getCurrency, getTextCount, getTheme } from '../../../../app/appFunctions';
 import { IconArrowDown, IconArrowUp, IconCheck, IconChevronDown } from '@tabler/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { CONTRACT, NEAR_OBJECT } from '../../../../app/appconfig';
@@ -8,6 +8,7 @@ import { getReadableTokenBalance, getTokenPrice } from '../../../../app/nearutil
 import NearSellRow from './NearSellRow';
 import TokenSellRow from './TokenSellRow';
 import SelectTokenModal from '../../modals/SelectTokenModal';
+import SelectCurrencyModal from '../../modals/SelectCurrencyModal';
 
 
 
@@ -43,7 +44,6 @@ const Sell = () => {
     const [offers, setOffers] = useState([])
     const [tokenOffers, setTokenOffers] = useState([])
     const [tokens, setTokens] = useState([])
-    const [currencies, setCurrencies] = useState([])
     const [payments, setPayments] = useState([])
 
     const [loading, setLoading] = useState(false)
@@ -52,11 +52,11 @@ const Sell = () => {
 
     const [selectedToken, setSelectedToken] = useState(NEAR_OBJECT)
     const [selectedPayment, setSelectedPayment] = useState("M-Pesa")
-    const [selectedCurrency, setSelectedCurrency] = useState("KES")
+    const [selectedCurrency, setSelectedCurrency] = useState(getCurrency('KES'))
 
-    const [searchedToken, setSearchedToken] = useState('')
-    const [modalOpen, setModalOpen] = useState(false)
+    const [modalOpen, setModalOpen] = useState(false) //Token modal
 
+    const [currencyModalOpen, setCurrencyModalOpen] = useState(false)
 
     const navigate = useNavigate()
 
@@ -126,6 +126,10 @@ const Sell = () => {
         setSelectedToken(token)
     }
 
+    const selectCurrency = (cur) => {
+        setSelectedCurrency(cur)
+    }
+
     const getTokens = () => {
         const wallet = window.walletConnection
         const contract = window.contract
@@ -134,26 +138,6 @@ const Sell = () => {
                 setTokens(res)
             }).catch(err => {
                 console.log("Fetching tokens error", err)
-            })
-        }
-    }
-
-    const filterTokens = () => {
-        const filteredTokens = tokens.filter(token => {
-            const regex = new RegExp(searchedToken, 'i');
-            return token.symbol.match(regex) || token.name.match(regex) || token.address.match(regex)
-        })
-        return filteredTokens
-    }
-
-    const getCurrencies = () => {
-        const wallet = window.walletConnection
-        const contract = window.contract
-        if (wallet && contract) {
-            wallet.account().viewFunction(CONTRACT, "get_currencies", {}).then(res => {
-                setCurrencies(res)
-            }).catch(err => {
-                console.log("Fetching currencies error", err)
             })
         }
     }
@@ -185,7 +169,6 @@ const Sell = () => {
 
     useEffect(() => {
         getTokens()
-        getCurrencies()
         getPayments()
     }, [])
 
@@ -194,13 +177,13 @@ const Sell = () => {
         loadOffers()
     }, [selectedToken, selectedPayment, selectedCurrency])
 
-    console.log(selectedToken)
-
     return (
         <Paper pt="md" radius="lg" sx={theme => ({
             background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[2]
         })}>
             <SelectTokenModal open={modalOpen} tokens={tokens} select={selectToken} closeModal={closeModal} selectedToken={selectedToken} />
+            <SelectCurrencyModal open={currencyModalOpen} select={selectCurrency} closeModal={() => setCurrencyModalOpen(false)} selected={selectedCurrency} />
+            
             <Grid mb="xl" mt="md">
                 <Grid.Col xs={4} md={4}>
                     <Center style={{
@@ -212,23 +195,6 @@ const Sell = () => {
                                 <Text><b>{selectedToken?.symbol}</b></Text>
                             </Group>
                         </Button>
-                        {/* <Popover width={400} position="bottom" shadow="md" radius="lg">
-                            <Popover.Target>
-                            </Popover.Target>
-                            <Popover.Dropdown>
-                                <TextInput radius="xl" value={searchedToken} onChange={e => setSearchedToken(e.target.value)} type="search" placeholder='Search by name | symbol | address' />
-                                <Group align="center" position='center' py="xs">
-                                    <Asset asset={{ ...NEAR_OBJECT, address: "near" }} selected={selectedToken} select={selectToken} />
-                                    {
-                                        filterTokens().map((token_, index) => {
-                                            return (
-                                                <Asset key={`buy_token_${index}`} asset={token_} selected={selectedToken} select={selectToken} />
-                                            )
-                                        })
-                                    }
-                                </Group>
-                            </Popover.Dropdown>
-                        </Popover> */}
                     </Center>
                 </Grid.Col>
                 <Grid.Col xs={4} md={4}>
@@ -255,20 +221,19 @@ const Sell = () => {
                     <Center style={{
                         height: "100%"
                     }}>
-                        <Select
-                            // label="Choose Currency"
-                            placeholder="Currency"
-                            value={selectedCurrency}
-                            onChange={val => setSelectedCurrency(val)}
-                            itemComponent={PaymentSelect}
-                            data={currencies}
-                            searchable
-                            maxDropdownHeight={400}
-                            nothingFound="Currency Not Found"
-                            filter={(value, item) =>
-                                value.toLowerCase().includes(value.toLowerCase().trim())
-                            }
-                        />
+                       <Button onClick={e => setCurrencyModalOpen(true)} variant="default" px="xl" radius="xl">
+                            <Group>
+                                <Avatar sx={theme => ({
+                                    background: theme.fn.linearGradient(45, 'red', 'blue'),
+                                    ".mantine-Avatar-placeholder": {
+                                        background: "transparent"
+                                    }
+                                })} size="md" radius="xl">
+                                    {selectedCurrency?.symbol}
+                                </Avatar>
+                                <Text><b>{getTextCount(selectedCurrency?.name || "Select Currency", 15)}</b></Text>
+                            </Group>
+                        </Button>
                     </Center>
                 </Grid.Col>
             </Grid>
