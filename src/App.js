@@ -68,39 +68,41 @@ function App() {
     connectors,
     provider,
   });
-  const createAccount = () => {
-    // Function called whenever market url is called once, to make sure the user has a registered account.
-    const contract = window.contract
-    const wallet = window.walletConnection
 
-    if (contract && wallet && contract.register_new_account) {
-      contract.register_new_account({ account_id: wallet.getAccountId() }).then(res => {
-        if (res.trim() === "Account registered successfully".trim()) {
-          showNotification({
-            title: "Account Registration",
-            message: "Account registered successfully",
-            color: "green.9",
-          })
-          // getSukumaAccount()
-        }
-        else if (res.trim() === "Account already registered".trim()) {
-          showNotification({
-            title: "Account Registration",
-            message: "Account already registered",
-            color: "blue.9",
-          })
-          // getSukumaAccount()
-        }
-      }).catch(err => {
-        console.log("error", err)
-        // showNotification({
-        //   title: "Error",
-        //   message: "Account registration failed",
-        //   color: "red.7",
-        // })
-      })
-    }
-  }
+  //un comment this to connect Near protocal
+  // const createAccount = () => {
+  //   // Function called whenever market url is called once, to make sure the user has a registered account.
+  //   const contract = window.contract
+  //   const wallet = window.walletConnection
+
+  //   if (contract && wallet && contract.register_new_account) {
+  //     contract.register_new_account({ account_id: wallet.getAccountId() }).then(res => {
+  //       if (res.trim() === "Account registered successfully".trim()) {
+  //         showNotification({
+  //           title: "Account Registration",
+  //           message: "Account registered successfully",
+  //           color: "green.9",
+  //         })
+  //         // getSukumaAccount()
+  //       }
+  //       else if (res.trim() === "Account already registered".trim()) {
+  //         showNotification({
+  //           title: "Account Registration",
+  //           message: "Account already registered",
+  //           color: "blue.9",
+  //         })
+  //         // getSukumaAccount()
+  //       }
+  //     }).catch(err => {
+  //       console.log("error", err)
+  //       // showNotification({
+  //       //   title: "Error",
+  //       //   message: "Account registration failed",
+  //       //   color: "red.7",
+  //       // })
+  //     })
+  //   }
+  // }
 
   useEffect(() => {
     // createAccount()
@@ -109,6 +111,30 @@ function App() {
   return (
     <AppWrapper>
       <Routes>
+      <WagmiConfig client={wagmiClient}>
+      <RainbowKitProvider
+        chains={chains}
+        theme={lightTheme({
+          overlayBlur: "small",
+        })}
+      >
+        <ReceiptProvider>
+          <Component {...pageProps} />
+          <Toaster
+            position="top-center"
+            reverseOrder={false}
+            toastOptions={{
+              style: {
+                overflow: "hidden",
+                maxWidth: "100%",
+                width: "fit-content",
+              },
+            }}
+          />
+        </ReceiptProvider>
+      </RainbowKitProvider>
+    </WagmiConfig>
+    
         <Route path='/' element={<MainHome />} >
           <Route path='/' element={<Home />} />
           <Route path='/market/' element={<MarketWrapper />} >
