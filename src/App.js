@@ -29,7 +29,16 @@ import { showNotification } from '@mantine/notifications';
 import Sell from './applications/market/pages/sell/Sell';
 import CreateTokenBuyTrade from './applications/market/pages/buy/CreateTokenBuyTrade';
 import TokenChat from './applications/market/pages/chats/TokenChat';
+//wagmi imports
+import "@rainbow-me/rainbowkit/styles.css";
 
+import {
+  getDefaultWallets,
+  lightTheme,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
+import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
+import { publicProvider } from "wagmi/providers/public";
 
 const MainHome = () => {
 
@@ -41,6 +50,8 @@ const MainHome = () => {
 }
 
 function App() {
+  //wagmi accounts
+
 
   const createAccount = () => {
     // Function called whenever market url is called once, to make sure the user has a registered account.
