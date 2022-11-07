@@ -51,7 +51,11 @@ const MainHome = () => {
 
 function App() {
   //wagmi accounts
-
+    //configure chains
+  const { chains, provider } = configureChains(
+    [chain.mainnet, chain.polygon],
+    [publicProvider()]
+  );
 
   const createAccount = () => {
     // Function called whenever market url is called once, to make sure the user has a registered account.
