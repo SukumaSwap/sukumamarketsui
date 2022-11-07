@@ -53,10 +53,16 @@ function App() {
   //wagmi accounts
     //configure chains
   const { chains, provider } = configureChains(
-    [chain.mainnet, chain.polygon],
+    [chain.mainnet, chain.polygon, chain.arbitrum],
     [publicProvider()]
   );
 
+//connector
+  const { connectors } = getDefaultWallets({
+    appName: "Connect Wallet",
+    chains,
+  });
+  
   const createAccount = () => {
     // Function called whenever market url is called once, to make sure the user has a registered account.
     const contract = window.contract
