@@ -62,7 +62,12 @@ function App() {
     appName: "Connect Wallet",
     chains,
   });
-  
+//creATE WAGMI CLIENT
+  const wagmiClient = createClient({
+    autoConnect: true,
+    connectors,
+    provider,
+  });
   const createAccount = () => {
     // Function called whenever market url is called once, to make sure the user has a registered account.
     const contract = window.contract
