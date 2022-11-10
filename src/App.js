@@ -29,16 +29,9 @@ import { showNotification } from '@mantine/notifications';
 import Sell from './applications/market/pages/sell/Sell';
 import CreateTokenBuyTrade from './applications/market/pages/buy/CreateTokenBuyTrade';
 import TokenChat from './applications/market/pages/chats/TokenChat';
-//wagmi imports
-import "@rainbow-me/rainbowkit/styles.css";
+import CreateSellTrade from './applications/market/pages/sell/CreateSellTrade';
+import CreateTokenSellTrade from './applications/market/pages/sell/CreateTokenSellTrade';
 
-import {
-  getDefaultWallets,
-  lightTheme,
-  RainbowKitProvider,
-} from "@rainbow-me/rainbowkit";
-import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
 
 const MainHome = () => {
 
@@ -50,59 +43,40 @@ const MainHome = () => {
 }
 
 function App() {
-  //wagmi accounts
-    //configure chains
-  const { chains, provider } = configureChains(
-    [chain.mainnet, chain.polygon, chain.arbitrum],
-    [publicProvider()]
-  );
 
-//connector
-  const { connectors } = getDefaultWallets({
-    appName: "Connect Wallet",
-    chains,
-  });
-//creATE WAGMI CLIENT
-  const wagmiClient = createClient({
-    autoConnect: true,
-    connectors,
-    provider,
-  });
+  const createAccount = () => {
+    // Function called whenever market url is called once, to make sure the user has a registered account.
+    const contract = window.contract
+    const wallet = window.walletConnection
 
-  //un comment this to connect Near protocal
-  // const createAccount = () => {
-  //   // Function called whenever market url is called once, to make sure the user has a registered account.
-  //   const contract = window.contract
-  //   const wallet = window.walletConnection
-
-  //   if (contract && wallet && contract.register_new_account) {
-  //     contract.register_new_account({ account_id: wallet.getAccountId() }).then(res => {
-  //       if (res.trim() === "Account registered successfully".trim()) {
-  //         showNotification({
-  //           title: "Account Registration",
-  //           message: "Account registered successfully",
-  //           color: "green.9",
-  //         })
-  //         // getSukumaAccount()
-  //       }
-  //       else if (res.trim() === "Account already registered".trim()) {
-  //         showNotification({
-  //           title: "Account Registration",
-  //           message: "Account already registered",
-  //           color: "blue.9",
-  //         })
-  //         // getSukumaAccount()
-  //       }
-  //     }).catch(err => {
-  //       console.log("error", err)
-  //       // showNotification({
-  //       //   title: "Error",
-  //       //   message: "Account registration failed",
-  //       //   color: "red.7",
-  //       // })
-  //     })
-  //   }
-  // }
+    if (contract && wallet && contract.register_new_account) {
+      contract.register_new_account({ account_id: wallet.getAccountId() }).then(res => {
+        if (res.trim() === "Account registered successfully".trim()) {
+          showNotification({
+            title: "Account Registration",
+            message: "Account registered successfully",
+            color: "green.9",
+          })
+          // getSukumaAccount()
+        }
+        else if (res.trim() === "Account already registered".trim()) {
+          showNotification({
+            title: "Account Registration",
+            message: "Account already registered",
+            color: "blue.9",
+          })
+          // getSukumaAccount()
+        }
+      }).catch(err => {
+        console.log("error", err)
+        // showNotification({
+        //   title: "Error",
+        //   message: "Account registration failed",
+        //   color: "red.7",
+        // })
+      })
+    }
+  }
 
   useEffect(() => {
     // createAccount()
@@ -111,30 +85,6 @@ function App() {
   return (
     <AppWrapper>
       <Routes>
-      <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider
-        chains={chains}
-        theme={lightTheme({
-          overlayBlur: "small",
-        })}
-      >
-        <ReceiptProvider>
-          <Component {...pageProps} />
-          <Toaster
-            position="top-center"
-            reverseOrder={false}
-            toastOptions={{
-              style: {
-                overflow: "hidden",
-                maxWidth: "100%",
-                width: "fit-content",
-              },
-            }}
-          />
-        </ReceiptProvider>
-      </RainbowKitProvider>
-    </WagmiConfig>
-    
         <Route path='/' element={<MainHome />} >
           <Route path='/' element={<Home />} />
           <Route path='/market/' element={<MarketWrapper />} >
@@ -145,7 +95,8 @@ function App() {
             <Route path="buy/create-buy-trade/asset/:offer_id/" element={<CreateTokenBuyTrade />} />
 
             <Route path="sell" element={<Sell />} />
-            <Route path="sell/create-sell-trade/:offer_id/" element={<CreateBuyTrade />} />
+            <Route path="sell/create-sell-trade/:offer_id/" element={<CreateSellTrade />} />
+            <Route path="sell/create-sell-trade/asset/:offer_id/" element={<CreateTokenSellTrade />} />
 
             <Route path="chats/:chat_id/" element={<TradeChat />} />
             <Route path="chats/token/:chat_id/" element={<TokenChat />} />

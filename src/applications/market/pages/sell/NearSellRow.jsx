@@ -1,20 +1,22 @@
-import { Avatar, Button, Group, NavLink, Stack, Text } from '@mantine/core'
+import { Avatar, Button, Group, NavLink, Stack, Text, Tooltip } from '@mantine/core'
 import { IconArrowDown, IconArrowUp } from '@tabler/icons'
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { NEAR_OBJECT } from '../../../../app/appconfig'
 import { getTextCount } from '../../../../app/appFunctions'
-import { getReadableTokenBalance } from '../../../../app/nearutils'
+import { calcOfferRate, getReadableTokenBalance } from '../../../../app/nearutils'
 
-const NearSellRow = ({offer}) => {
+const NearSellRow = ({ offer, tokenprice }) => {
+
     const navigate = useNavigate()
     const goTo = (url) => {
         navigate(url)
     }
+
     return (
-        <tr>
+        <tr >
             <td className='custom-td'>
-                <NavLink label={getTextCount(offer.offerer, 20)} to={`/market/accounts/${offer.offerer}`} component={Link} />
+                <NavLink label={getTextCount(offer?.offerer?.id, 20)} to={`/market/accounts/${offer?.offerer?.id}`} component={Link} />
             </td>
             <td className='custom-td'>
                 <Group>
@@ -42,21 +44,25 @@ const NearSellRow = ({offer}) => {
                     <Group>
                         {offer?.offer_rate > 0 ? (
                             <>
-                                <IconArrowUp color="green" />
-                                <Text color="green">{offer.offer_rate} %</Text>
+                                <IconArrowDown color="red" />
+                                {offer.offer_rate}%
                             </>
                         ) : (
                             <>
-                                <IconArrowDown color="red" />
-                                {offer?.offer_rate} %
+                                <IconArrowUp color="green" />
+                                {offer?.offer_rate * -1}%
                             </>
                         )
                         }
-                        <Text>4.323</Text>
+                        <Tooltip label={`Original price $${tokenprice}`} color="violet">
+                            <Text>
+                                ${calcOfferRate(offer?.offer_rate, tokenprice)}
+                            </Text>
+                        </Tooltip>
                     </Group>
                     <Button radius="xl" color="red" style={{
                         width: "120px"
-                    }} onClick={e => goTo("/market/sell/create-sell-trade/offer_id/")}>Sell</Button>
+                    }} onClick={e => goTo(`/market/sell/create-sell-trade/${offer?.id}/`)}>Sell</Button>
                 </Stack>
             </td>
         </tr>

@@ -370,6 +370,7 @@ const TradeChat = () => {
 
     }
 
+    console.log(chat)
 
     useEffect(() => {
         loadTradeChat()

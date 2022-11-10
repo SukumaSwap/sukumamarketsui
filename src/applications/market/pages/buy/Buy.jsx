@@ -1,12 +1,14 @@
 import React, { forwardRef, useEffect, useState } from 'react'
 import { Avatar, Button, Center, Grid, Group, Paper, Popover, ScrollArea, Table, TextInput, Text, Select, Stack, NavLink, useMantineTheme } from '@mantine/core'
-import { getTextCount, getTheme } from '../../../../app/appFunctions';
+import { getCurrency, getTextCount, getTheme } from '../../../../app/appFunctions';
 import { IconArrowDown, IconArrowUp, IconCheck, IconChevronDown } from '@tabler/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { CONTRACT, NEAR_OBJECT } from '../../../../app/appconfig';
 import { getReadableTokenBalance, getTokenPrice } from '../../../../app/nearutils';
 import NearBuyRow from './NearBuyRow';
 import TokenBuyRow from './TokenBuyRow';
+import SelectTokenModal from '../../modals/SelectTokenModal';
+import SelectCurrencyModal from '../../modals/SelectCurrencyModal';
 
 // const offers = [
 //     {
@@ -87,7 +89,7 @@ const PaymentSelectOne = forwardRef((props, ref) => (
         <Group noWrap>
             <img src={props.icon} height="20px" alt={props?.name} />
             <div>
-                <Text size="sm">{props?.name}</Text>
+                <Text size="sm">{props?.label}</Text>
             </div>
         </Group>
     </div>
@@ -125,12 +127,13 @@ const Buy = () => {
 
     const [tokenPrice, setTokenPrice] = useState(null)
 
-    const [selectedToken, setSelectedToken] = useState("near")
+    const [selectedToken, setSelectedToken] = useState(NEAR_OBJECT)
     const [selectedPayment, setSelectedPayment] = useState("M-Pesa")
-    const [selectedCurrency, setSelectedCurrency] = useState("KES")
+    const [selectedCurrency, setSelectedCurrency] = useState(getCurrency('KES'))
 
-    const [searchedToken, setSearchedToken] = useState('')
-
+    
+    const [modalOpen, setModalOpen] = useState(false) // Token modal
+    const [currencyModalOpen, setCurrencyModalOpen] = useState(false)
 
     const navigate = useNavigate()
 
@@ -153,7 +156,7 @@ const Buy = () => {
     const loadTokenOffers = () => {
         const contract = window.contract
         const wallet = window.walletConnection
-        if ( wallet) {
+        if (wallet) {
             setLoading(true)
             //   contract.get_sell_token_offers_by_token({ token: selectedToken }).then(res => {
             //     setOffers(res)
@@ -163,7 +166,7 @@ const Buy = () => {
             //   }).finally(() => {
             //     setLoading(false)
             //   })
-            wallet.account().viewFunction(CONTRACT, "get_sell_token_offers_by_token", {token: selectedToken }).then(res => {
+            wallet.account().viewFunction(CONTRACT, "get_sell_token_offers_by_token", { token: selectedToken?.address }).then(res => {
                 setTokenOffers(res)
             }).catch(err => {
                 console.log("Fetching tokens error", err)
@@ -180,7 +183,7 @@ const Buy = () => {
     ))
 
     const getTokenRate = () => {
-        if (selectedToken === "near") {
+        if (selectedToken?.address === "near") {
             getTokenPrice("wrap.testnet").then(res => {
                 setTokenPrice(res?.price)
             }).catch(err => {
@@ -188,7 +191,7 @@ const Buy = () => {
             })
         }
         else {
-            getTokenPrice(selectedToken).then(res => {
+            getTokenPrice(selectedToken?.address).then(res => {
                 setTokenPrice(res?.price)
             }).catch(err => {
                 console.log("Token price error", err)
@@ -196,8 +199,12 @@ const Buy = () => {
         }
     }
 
-    const selectToken = (address) => {
-        setSelectedToken(address)
+    const selectToken = (token) => {
+        setSelectedToken(token)
+    }
+
+    const selectCurrency = (cur) => {
+        setSelectedCurrency(cur)
     }
 
     const getTokens = () => {
@@ -208,26 +215,6 @@ const Buy = () => {
                 setTokens(res)
             }).catch(err => {
                 console.log("Fetching tokens error", err)
-            })
-        }
-    }
-
-    const filterTokens = () => {
-        const filteredTokens = tokens.filter(token => {
-            const regex = new RegExp(searchedToken, 'i');
-            return token.symbol.match(regex) || token.name.match(regex) || token.address.match(regex)
-        })
-        return filteredTokens
-    }
-
-    const getCurrencies = () => {
-        const wallet = window.walletConnection
-        const contract = window.contract
-        if (wallet && contract) {
-            wallet.account().viewFunction(CONTRACT, "get_currencies", {}).then(res => {
-                setCurrencies(res)
-            }).catch(err => {
-                console.log("Fetching currencies error", err)
             })
         }
     }
@@ -245,7 +232,7 @@ const Buy = () => {
     }
 
     const loadOffers = () => {
-        if (selectedToken === "near") {
+        if (selectedToken?.address === "near") {
             loadNearOffers()
         }
         else {
@@ -253,9 +240,12 @@ const Buy = () => {
         }
     }
 
+    const closeModal = () => {
+        setModalOpen(false)
+    }
+
     useEffect(() => {
         getTokens()
-        getCurrencies()
         getPayments()
     }, [])
 
@@ -264,35 +254,23 @@ const Buy = () => {
         loadOffers()
     }, [selectedToken, selectedPayment, selectedCurrency])
 
-
     return (
         <Paper pt="md" radius="lg" sx={theme => ({
             background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[2]
         })}>
-
+            <SelectTokenModal open={modalOpen} tokens={tokens} select={selectToken} closeModal={closeModal} selectedToken={selectedToken} />
+            <SelectCurrencyModal open={currencyModalOpen} select={selectCurrency} closeModal={() => setCurrencyModalOpen(false)} selected={selectedCurrency} />
             <Grid mb="xl" mt="md">
                 <Grid.Col xs={4} md={4}>
                     <Center style={{
                         height: "100%"
                     }}>
-                        <Popover width={400} position="bottom" shadow="md" radius="lg">
-                            <Popover.Target>
-                                <Button rightIcon={<IconChevronDown />} variant="default" px="xl">Asset - {selectedToken}</Button>
-                            </Popover.Target>
-                            <Popover.Dropdown>
-                                <TextInput radius="xl" value={searchedToken} onChange={e => setSearchedToken(e.target.value)} type="search" placeholder='Search by name | symbol | address' />
-                                <Group align="center" position='center' py="xs">
-                                    <Asset asset={{ ...NEAR_OBJECT, address: "near" }} selected={selectedToken} select={selectToken} />
-                                    {
-                                        filterTokens().map((token_, index) => {
-                                            return (
-                                                <Asset key={`buy_token_${index}`} asset={token_} selected={selectedToken} select={selectToken} />
-                                            )
-                                        })
-                                    }
-                                </Group>
-                            </Popover.Dropdown>
-                        </Popover>
+                        <Button onClick={e => setModalOpen(true)} variant="default" px="xl" radius="xl">
+                            <Group>
+                                <Avatar style={{ overflow: "hidden" }} size="sm" radius="xl" src={selectedToken?.icon} />
+                                <Text><b>{selectedToken?.symbol}</b></Text>
+                            </Group>
+                        </Button>
                     </Center>
                 </Grid.Col>
                 <Grid.Col xs={4} md={4}>
@@ -319,20 +297,19 @@ const Buy = () => {
                     <Center style={{
                         height: "100%"
                     }}>
-                        <Select
-                            // label="Choose Currency"
-                            placeholder="Currency"
-                            value={selectedCurrency}
-                            onChange={val => setSelectedCurrency(val)}
-                            itemComponent={PaymentSelect}
-                            data={currencies}
-                            searchable
-                            maxDropdownHeight={400}
-                            nothingFound="Currency Not Found"
-                            filter={(value, item) =>
-                                value.toLowerCase().includes(value.toLowerCase().trim())
-                            }
-                        />
+                        <Button onClick={e => setCurrencyModalOpen(true)} variant="default" px="xl" radius="xl">
+                            <Group>
+                                <Avatar sx={theme => ({
+                                    background: theme.fn.linearGradient(45, 'red', 'blue'),
+                                    ".mantine-Avatar-placeholder": {
+                                        background: "transparent"
+                                    }
+                                })} size="md" radius="xl">
+                                    {selectedCurrency?.symbol}
+                                </Avatar>
+                                <Text><b>{getTextCount(selectedCurrency?.name || "Select Currency", 15)}</b></Text>
+                            </Group>
+                        </Button>
                     </Center>
                 </Grid.Col>
             </Grid>
@@ -357,10 +334,10 @@ const Buy = () => {
                         </thead>
                         <tbody>
                             {
-                                selectedToken && selectedToken === "near" && rows
+                                selectedToken && selectedToken?.address === "near" && rows
                             }
                             {
-                                selectedToken && selectedToken !== "near" && token_rows
+                                selectedToken && selectedToken?.address !== "near" && token_rows
                             }
                         </tbody>
                     </Table>

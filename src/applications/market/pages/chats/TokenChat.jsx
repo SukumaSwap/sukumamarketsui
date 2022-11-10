@@ -216,7 +216,7 @@ const TokenChat = () => {
         const conn = window.walletConnection
         if (contract && conn && contract.mark_as_received) {
             setLoading(true)
-            contract.mark_token_as_received({ chat_id: chat_id }).then(res => {
+            contract.mark_token_as_received({ chat_id: chat_id }, 300000000000000).then(res => {
                 // updateFirebase({ received: true })
                 fbSendMsg(`<b>${chat?.receiver}</b> has released the asset.`, { received: true, released: true })
                 showNotification({

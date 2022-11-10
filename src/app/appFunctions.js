@@ -1,3 +1,5 @@
+import { CURRENCIES } from "./appconfig";
+
 const validateUrl = (url) => {
   const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
@@ -33,17 +35,34 @@ const greenGradientBg = (theme) => {
 }
 
 const formatNumber = (num) => {
-  return new Number(num).toLocaleString('en-US', {minimumFractionDigits: 2})
+  return new Number(num).toLocaleString('en-US', { minimumFractionDigits: 2 })
 }
 
 
-export const convertNstoTime = (nanoseconds) => {
+export const convertNstoTime = (nanoseconds, full) => {
   if (nanoseconds) {
     const millis = parseInt((nanoseconds / 1000000))
     const time = new Date(millis)
-    return time.toDateString() + " " + time.toLocaleTimeString()
+    if (!full) {
+      return time.toDateString() + " " + time.toLocaleTimeString()
+    }
+    return time.toDateString()
   }
   return "-"
+}
+
+export const getCurrency = (symbol) => {
+  return CURRENCIES.find(cur => cur.symbol === symbol)
+}
+
+export const getCurrencies = (symbols_array) => {
+  let currencies = []
+  symbols_array.forEach(s => {
+    let curr = CURRENCIES.find(cur => cur.symbol === s)
+    currencies.push(curr)
+  })
+
+  return currencies
 }
 
 

@@ -43,9 +43,7 @@
     "redux-persist": "^6.0.0",
     "regenerator-runtime": "^0.13.9",
     "video-thumbnail-url": "^1.0.1",
-
     "wagmi": "^0.7.15",
-
     "web-vitals": "^2.1.4"
   },
   "scripts": {

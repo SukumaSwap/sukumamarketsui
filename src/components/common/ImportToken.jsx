@@ -19,7 +19,6 @@ const ImportTokenModal = ({ open, onclose, callbackfn }) => {
             wallet.account().viewFunction(searchedToken, "ft_metadata", {}, "3000000000000000").then(res => {
                 setTokenFound(res)
             }).catch(err => {
-                console.log("ft metadata error", err)
                 setError("Something went wrong, check the token address and try again")
             }).finally(() => {
                 setSearching(false)

@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { Button, Group, Modal, Paper, Stepper, Text, TextInput, Title, NumberInput, ScrollArea, Center, Stack, Avatar, useMantineTheme } from '@mantine/core';
-import { IconArrowBarUp, IconArrowForward, IconArrowBack, IconCurrencyDollar, IconExclamationMark, IconCheck } from '@tabler/icons';
+import { Button, Group, Modal, Paper, Stepper, Text, TextInput, Title, NumberInput, ScrollArea, Center, Stack, Avatar, useMantineTheme, Chip } from '@mantine/core';
+import { IconArrowBarUp, IconArrowForward, IconArrowBack, IconCurrencyDollar, IconExclamationMark, IconCheck, IconAsset, IconRegistered } from '@tabler/icons';
 import { getTheme } from '../../../app/appFunctions';
-import { useNavigate } from 'react-router-dom';
 
 import BigNumber from 'bignumber.js'
 import { utils } from 'near-api-js';
@@ -11,43 +10,56 @@ import { useMemo } from 'react';
 import { CONTRACT, NEAR_OBJECT } from '../../../app/appconfig';
 import { showNotification } from '@mantine/notifications';
 import { BigNumberCompare, getReadableTokenBalance } from '../../../app/nearutils';
-import { current } from '@reduxjs/toolkit';
+import { useModals } from '@mantine/modals';
+import RegisterContractModal from './RegisterContractModal';
 
 const Asset = ({ token, current_token, select, setMetadata, settokenbal }) => {
     const theme = useMantineTheme()
 
     const [metadata, setTokenMetadata] = useState({})
     const [bal, setBal] = useState("0")
-    const [err, setErr] = useState(true)
+    const [err, setErr] = useState(false)
 
     const getTokenMetadata = () => {
         const wallet = window.walletConnection
-        if (wallet) {
-            wallet.account().viewFunction(current_token, "ft_metadata", {}, "3000000000000000").then(res => {
-                setTokenMetadata(current => ({ ...current, ...res }))
-                setErr(false)
-            }).catch(err => {
-                // console.log("nothing")
-                setErr(true)
-            })
+        if (current_token?.tokenId === "near") {
+            setTokenMetadata(NEAR_OBJECT)
+            return
+        }
+        else {
+            if (wallet) {
+                wallet.account().viewFunction(current_token?.tokenId, "ft_metadata", {}, "3000000000000000").then(res => {
+                    setTokenMetadata(current => ({ ...current, ...res }))
+                    setErr(false)
+                }).catch(err => {
+                    setErr(true)
+                })
+            }
+            return
         }
     }
 
     const getTokenBalance = () => {
         const wallet = window.walletConnection
-        if (wallet) {
-            const account = wallet.getAccountId()
-            wallet.account().viewFunction(current_token, "ft_balance_of", { account_id: account }).then(res => {
-                setBal(res)
-                setTokenMetadata(current => ({ ...current, balance: res }))
-            })
-                .catch(err => {
+        if (current_token?.tokenId === "near") {
+            setBal(current_token?.balance)
+            return
+        }
+        else {
+            if (wallet) {
+                const account = wallet.getAccountId()
+                wallet.account().viewFunction(current_token?.tokenId, "ft_balance_of", { account_id: account }).then(res => {
+                    setBal(res)
+                    setTokenMetadata(current => ({ ...current, balance: res }))
+                }).catch(err => {
 
                 })
+            }
+            return
         }
     }
 
-    useEffect(() => {
+    useMemo(() => {
         getTokenBalance()
         getTokenMetadata()
     }, [])
@@ -59,25 +71,25 @@ const Asset = ({ token, current_token, select, setMetadata, settokenbal }) => {
                     <Paper p="xs" radius="md" sx={theme => ({
                         background: getTheme(theme) ? theme.colors.dark[6] : theme.colors.gray[2],
                         cursor: "pointer",
-                        borderColor: token === current_token ? theme.colors.blue[6] : "transparent",
+                        borderColor: token === current_token?.tokenId ? theme.colors.blue[6] : "transparent",
                         borderWidth: "1px",
                         borderStyle: "solid"
                     })} onClick={e => {
-                        select(current_token)
+                        select(current_token?.tokenId)
                         setMetadata(metadata)
                         settokenbal(bal)
                     }}>
                         <Group>
                             <Avatar src={metadata?.icon} />
                             <Stack spacing={0} p={0}>
-                                <Text color={token === current_token ? theme.colors.blue[6] : getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]}>
+                                <Text color={token === current_token?.tokenId ? theme.colors.blue[6] : getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]}>
                                     {metadata?.symbol}
                                 </Text>
-                                <Text color={token === current_token ? theme.colors.blue[6] : getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]}>
+                                <Text color={token === current_token?.tokenId ? theme.colors.blue[6] : getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]}>
                                     {getReadableTokenBalance(bal || "0", metadata?.decimals)}
                                 </Text>
                             </Stack>
-                            <IconCheck color={token === current_token ? theme.colors.blue[6] : "transparent"} />
+                            <IconCheck color={token === current_token?.tokenId ? theme.colors.blue[6] : "transparent"} />
                         </Group>
                     </Paper>
                 )
@@ -104,7 +116,9 @@ const DepositModal = () => {
     const [loadingNearAcc, setLoadingNearAcc] = useState(true)
     const [nearAccount, setNearAccount] = useState(null)
 
-    const navigate = useNavigate()
+    const [FtAccountModal, setFtAccountModal] = useState(false)
+
+    const modals = useModals()
 
     const nearDeposit = () => {
         const contract = window.contract
@@ -125,8 +139,6 @@ const DepositModal = () => {
                 console.log(res)
             }).catch(err => {
                 console.log(err)
-            }).finally(() => {
-                setLoading(false)
             })
         }
     }
@@ -159,16 +171,6 @@ const DepositModal = () => {
         }
     }
 
-
-    const getTokenMetadata = () => {
-        const wallet = window.walletConnection
-        if (wallet) {
-            wallet.account().viewFunction(token, "ft_metadata", {}, "3000000000000000").then(res => {
-                setTokenMetadata(res)
-            })
-        }
-    }
-
     const getToken = (metadata) => {
         if (token === "near") {
             setTokenMetadata(NEAR_OBJECT)
@@ -184,6 +186,17 @@ const DepositModal = () => {
         }
         else {
             setTokenBal(bal)
+        }
+    }
+
+    const getIfAccountIsRegisteredWithAsset = (FT_CONTRACT) => {
+        const wallet = window.walletConnection;
+        if (wallet) {
+            wallet.account().viewFunction(FT_CONTRACT, "ft_balance_of", { account_id: CONTRACT }).then(res => {
+                setFtAccountModal(false)
+            }).catch(err => {
+                setFtAccountModal(true)
+            })
         }
     }
 
@@ -208,6 +221,9 @@ const DepositModal = () => {
 
     const selectToken = (address) => {
         setToken(address)
+        if (address !== "near") {
+            getIfAccountIsRegisteredWithAsset(address)
+        }
     }
 
     const getUserWalletTokens = async () => {
@@ -215,7 +231,7 @@ const DepositModal = () => {
         if (!wallet) {
             return
         }
-        else {
+        else if (wallet?.getAccountId()) {
             const res = await fetch(
                 `https://testnet-api.kitwallet.app/account/${wallet.getAccountId()}/likelyTokens`,
                 {
@@ -232,14 +248,6 @@ const DepositModal = () => {
         }
     };
 
-    const goBack = () => {
-        navigate(-1)
-    }
-
-    // useEffect(() => {
-    //     getToken()
-    // }, [token])
-
     useMemo(() => {
         getUserWalletTokens()
         getNearAccount()
@@ -248,13 +256,15 @@ const DepositModal = () => {
     return (
         <>
             <Button radius="xl" style={{
-                height: '44px'
-            }} variant="outline" color="gray.4" onClick={e => setOpen(true)}>
+                height: '44px',
+                color: getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]
+            }} variant="outline" onClick={e => setOpen(true)}>
                 <Group>
                     <>Deposit</>
                     <IconArrowBarUp size={18} />
                 </Group>
             </Button>
+            <RegisterContractModal token={token} />
             <Modal opened={open}
                 title="Deposit"
                 radius="lg"
@@ -272,35 +282,15 @@ const DepositModal = () => {
                     // onSelect={e => setStep(e.currentTarget.v)}
                     >
                         <Stepper.Step value={0} label="Select Asset">
-                            <TextInput radius="xl" size='md' placeholder='Search Asset' />
                             <ScrollArea style={{ height: "200px" }}>
                                 <Paper px="xs" py="xs" sx={theme => ({
                                     background: "transparent"
                                 })}>
 
                                     <Group>
-                                        <Paper p="xs" radius="md" sx={theme => ({
-                                            background: getTheme(theme) ? theme.colors.dark[6] : theme.colors.gray[2],
-                                            cursor: "pointer",
-                                            borderColor: token === "near" ? theme.colors.blue[6] : "transparent",
-                                            borderWidth: "1px",
-                                            borderStyle: "solid"
-                                        })} onClick={e => {
-                                            selectToken("near")
-                                            settokenbalance(nearAccount.available)
-                                        }}>
-                                            <Group>
-                                                <Avatar src={NEAR_OBJECT.icon} />
-                                                <Stack spacing={0} p={0}>
-                                                    <Text color={token === "near" ? theme.colors.blue[6] : getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]}>Near</Text>
-                                                    <Text color={token === "near" ? theme.colors.blue[6] : getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[6]}>{getReadableTokenBalance(nearAccount?.available, 24)}</Text>
-                                                </Stack>
-                                                <IconCheck color={token === "near" ? theme.colors.blue[6] : "transparent"} />
-                                            </Group>
-                                        </Paper>
                                         {
-                                            walletTokens && walletTokens.map((t, i) => (
-                                                <Asset key={`my_token__${i}`} token={token} current_token={t} select={selectToken} setMetadata={getToken} settokenbal={settokenbalance} />
+                                            walletTokens && [{ tokenId: "near", balance: nearAccount?.available }].concat(walletTokens).map((t, i) => (
+                                                <Asset key={`my_token__${i}`} token={token} current_token={{ tokenId: t?.tokenId || t, balance: t?.balance || 0 }} select={selectToken} setMetadata={getToken} settokenbal={settokenbalance} />
                                             ))
                                         }
                                     </Group>

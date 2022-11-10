@@ -1,4 +1,4 @@
-import { Avatar, Button, Group, Paper, Popover, ScrollArea, Table, Text, NavLink, Title, Checkbox } from '@mantine/core'
+import { Avatar, Button, Group, Paper, Popover, ScrollArea, Table, Text, NavLink, Title, Checkbox, Divider, Switch } from '@mantine/core'
 import React, { forwardRef, useState } from 'react'
 import { convertNstoTime, getTextCount, getTheme } from '../../../../app/appFunctions';
 import { IconCheck, IconChevronDown, IconMessageDots, IconX } from '@tabler/icons';
@@ -9,98 +9,6 @@ import parse from "html-react-parser"
 import { getReadableTokenBalance } from '../../../../app/nearutils';
 import NearChatRow from './NearChatRow';
 import TokenChatRow from './TokenChatRow';
-
-const offers = [
-    {
-        id: "offer-1",
-        offerer: 'dalmasonto.testnet',
-        max: '140',
-        min: '30',
-        token: {
-            title: 'Near',
-            icon: '',
-            asset: 'near',
-        },
-        payment: {
-            id: "bank",
-            title: "Bank",
-            icon: ''
-        },
-        currency: 'KES',
-        rate: -1
-    },
-    {
-        id: "offer-2",
-        offerer: 'dalmasonto.testnet',
-        max: '100',
-        min: '30',
-        token: {
-            title: 'Near',
-            icon: '',
-            asset: 'near',
-        },
-        payment: {
-            id: "m-pesa",
-            title: "M-Pesa",
-            icon: ''
-        },
-        currency: 'KES',
-        rate: -1
-    }
-]
-
-const paymentMethods = [
-    {
-        icon: "",
-        label: "M-Pesa",
-        value: "m-pesa",
-        symbol: null
-    }
-]
-
-const currencies = [
-    {
-        icon: "",
-        label: "KES",
-        value: "kes",
-        symbol: null
-    }
-]
-
-
-const PaymentSelect = forwardRef((props, ref) => (
-    <div ref={ref} {...props}>
-        <Group noWrap>
-            <Avatar src={props.icon} size="sm" className='text-capitalize'>{props.label && props.label[0]}</Avatar>
-            <div>
-                <Text size="sm">{props.label}</Text>
-                {props.symbol &&
-                    <Text size="xs" color="dimmed">
-                        {props.symbol} - <small>{props.address}</small>
-                    </Text>
-                }
-            </div>
-        </Group>
-    </div>
-));
-
-
-const Asset = ({ }) => {
-    return (
-        <Group sx={theme => ({
-            border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.gray[6] : theme.colors.gray[5]}`,
-            borderRadius: theme.radius.md,
-            padding: '2px 4px',
-            cursor: "pointer",
-            ":hover": {
-
-            }
-        })}>
-            <Avatar />
-            <Text>Near</Text>
-        </Group>
-    )
-}
 
 const tableHeaders = [
     {
@@ -115,7 +23,7 @@ const tableHeaders = [
     },
     {
         value: 'chat',
-        label: 'Chat',
+        label: 'Trade',
         show: true
     },
     {
@@ -126,7 +34,7 @@ const tableHeaders = [
     {
         value: 'owner',
         label: 'Chat Creator',
-        show: true
+        show: false
     },
     {
         value: 'offerer',
@@ -171,7 +79,7 @@ const tableHeaders = [
     {
         value: 'released',
         label: 'Released',
-        show: false
+        show: true
     },
     {
         value: 'payer_has_rated',
@@ -195,32 +103,40 @@ const tableHeaders = [
     },
 ]
 
-const trades = [
+const tradesSettings = [
     {
-        id: "someid",
-        offer_id: 'offer_id',
-        message: "dalmasonto.testnet to pay alexmatu.testnet kes 3000 for 2.14 Near",
-        token: 'wrap.testnet',
-        owner: 'alexmatu.testnet',
-        offerer: 'near',
-        amount: 3232423432,
-        active: false,
-        payer: 'dalmasonto.testner',
-        receiver: 'alexmatu.testnet',
-        paid: true,
-        received: false,
-        canceled: true,
-        released: false,
-        payer_has_rated: false,
-        receiver_has_rated: false,
-        started_at: 42434324,
-        ended_at: 424243243
+        id: "asset_type",
+        value: "all",
+        label: "All Assets",
+        active: true
+    },
+    {
+        id: "asset_type",
+        value: "near",
+        label: "Near",
+        active: true
+    },
+    {
+        id: "asset_type",
+        value: "others",
+        label: "Other Assets",
+        active: true
+    },
+    {
+        id: "trade_status",
+        value: "active",
+        label: "Active",
+        active: true
+    },
+    {
+        id: "trade_status",
+        value: "inactive",
+        label: "Inactive",
+        active: false
     }
 ]
 
-
-
-const SelectTableHeaders = ({ headers, selectHeader }) => {
+const SelectTableHeaders = ({ headers, selectHeader, settings, setSetting }) => {
     return (
         <Popover width={250} position="bottom" withArrow shadow="md" radius="md">
             <Popover.Target>
@@ -233,6 +149,39 @@ const SelectTableHeaders = ({ headers, selectHeader }) => {
                     <Paper px="sm" style={{
                         background: "transparent"
                     }} >
+                        <Text>Trades settings</Text>
+                        {
+                            tradesSettings.map((setting, index) => (
+                                <Group key={setting.value} position='apart' sx={theme => ({
+                                    width: "100% !important",
+                                    background: getTheme(theme) ? theme.colors.dark[4] : theme.colors.gray[2],
+                                    borderRadius: theme.radius.md,
+                                    padding: '6px 16px',
+                                    margin: "10px 0",
+                                    cursor: "pointer"
+                                })} onClick={e => {
+                                    if(setting.id === 'asset_type'){
+                                        setSetting("asset_type", setting.value)
+                                    }
+                                    else{
+                                        setSetting("trade_status", setting.active)
+                                    }
+                                }}>
+                                    <Text>{setting.label}</Text>
+                                    {
+                                        setting.id === 'asset_type' && 
+                                        <Switch checked={settings["asset_type"] === setting.value} readOnly />
+                                    }
+                                    {
+                                        setting.id === 'trade_status' && 
+                                        <Switch checked={settings["trade_status"] === setting.active} readOnly />
+                                    }
+                                </Group>
+                            ))
+                        }
+                        
+                        <Divider my="md" />
+                        <Text>Table settings</Text>
                         {
                             headers.map((header, index) => (
 
@@ -262,6 +211,10 @@ const SelectTableHeaders = ({ headers, selectHeader }) => {
 const TradeChats = () => {
 
     const [headers, setHeaders] = useState(tableHeaders)
+    const [settings, setSettings] = useState({
+        asset_type: "all",
+        trade_status: true
+    })
 
     const [loading, setLoading] = useState(false)
     const [chats, setChats] = useState([])
@@ -277,10 +230,10 @@ const TradeChats = () => {
         return headers.find(header => header.value === value)
     }
 
-    const rows = chats.map((obj, index) => (
+    const rows = chats?.filter(obj => obj?.active === settings?.trade_status).sort((a, b) => b.started_at - a.started_at).map((obj, index) => (
         <NearChatRow key={`near_chat_row_${index}`} obj={obj} getHeader={getHeader} />
     ))
-    const tokenrows = tokenChats.map((obj, index) => (
+    const tokenrows = tokenChats?.filter(obj => obj?.active === settings?.trade_status).map((obj, index) => (
         <TokenChatRow key={`token_chat_row_${index}`} obj={obj} getHeader={getHeader} />
     ))
 
@@ -294,14 +247,18 @@ const TradeChats = () => {
         setHeaders(headers_)
     }
 
+    const setSetting = (id, value) => {
+        const settings_ = {...settings}
+        settings_[id] = value
+        setSettings(settings_)
+    }
+
     const loadChats = () => {
         setLoading(true)
-        console.log("loading chats")
         const contract = window.contract
         const wallet = window.walletConnection
         if (contract && wallet) {
             wallet.account().viewFunction(CONTRACT, "get_account_chats", { account_id: wallet.getAccountId() }).then(res => {
-                console.log("have been reached", res)
                 if (typeof res === 'object') {
                     setChats(res)
                 }
@@ -344,7 +301,7 @@ const TradeChats = () => {
 
             <Group position='apart' px="md" mb="md">
                 <Title>Trade</Title>
-                <SelectTableHeaders headers={headers} selectHeader={selectHeader} />
+                <SelectTableHeaders headers={headers} selectHeader={selectHeader} settings={settings} setSetting={setSetting} />
             </Group>
 
             <Paper py="md" radius="lg" px="sm" sx={theme => ({
@@ -371,8 +328,18 @@ const TradeChats = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {rows}
+                            {
+                                settings?.asset_type === "all" && <>
+                                {rows}
                             {tokenrows}
+                                </>
+                            }
+                            {
+                                settings?.asset_type === "near" && rows
+                            }
+                            {
+                                settings?.asset_type === "others" && tokenrows
+                            }
                         </tbody>
                     </Table>
                 </ScrollArea>
