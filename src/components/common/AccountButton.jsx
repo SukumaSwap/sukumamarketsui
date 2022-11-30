@@ -127,7 +127,7 @@ function AccountButton() {
           })}
           px="xl"
           mb="xs"
-          onClick={(e) => goTo("/market")}
+          onClick={(e) => goTo("/near")}
         >
           <Group position="center">
             <IconUser />

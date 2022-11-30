@@ -3,7 +3,7 @@ import { Anchor, Avatar, Badge, Group, Indicator, NavLink, Stack, Text, Title, u
 import { IconDots } from "@tabler/icons";
 import { Link, useMatch, useResolvedPath } from "react-router-dom";
 
-const CustomNavLink = ({ navlink, openSidebar }) => {
+const CustomNavLink = ({ navlink, openSidebar, url_prefix }) => {
     const theme = useMantineTheme()
     let resolved = useResolvedPath(navlink.to);
     let match = useMatch({ path: resolved.pathname, end: true });
@@ -15,7 +15,7 @@ const CustomNavLink = ({ navlink, openSidebar }) => {
         return false
     }
     return (
-        <Anchor component={Link} to={navlink.to} style={{ textDecoration: "none" }} onClick={e => {
+        <Anchor component={Link} to={`/${url_prefix}/${navlink.to}`} style={{ textDecoration: "none" }} onClick={e => {
             if (openSidebar) {
                 openSidebar(false);
             }

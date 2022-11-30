@@ -9,11 +9,10 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { initContract } from './app/near/utils';
 
 import * as buffer from "buffer"
+window.Buffer = buffer.Buffer;
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-
-window.Buffer = buffer.Buffer;
 
 const APP_TO_RENDER = () => {
   return (

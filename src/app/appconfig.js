@@ -3,7 +3,8 @@ const SEPARATOR = ' | ';
 const APP_SEP = APP_NAME + SEPARATOR;
 
 // const CONTRACT = "supercode.testnet"
-const CONTRACT = "livedev.testnet"
+// const CONTRACT = "livedev.testnet"
+const CONTRACT = "dalmo.testnet"
 
 const CONTRACT_TOKEN_VIEW_METHODS = [
   "get_account_token_offers",
@@ -849,10 +850,9 @@ const CURRENCIES = [
   }
 ]
 
-const PAYMENT_METHODS = [
+export const PAYMENT_METHODS = [
     {
         name: "M-Pesa",
-        symbol: "M-Pesa",
         icon: ""
     }
 ]

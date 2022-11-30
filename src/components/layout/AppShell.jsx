@@ -20,7 +20,7 @@ const { chains, provider } = configureChains(
 );
 //connectors
 const { connectors } = getDefaultWallets({
-  appName: " Thee Landcoin",
+  appName: "Sukuma Markets",
   chains,
 });
 // client : connector + provider
@@ -31,6 +31,7 @@ const wagmiClient = createClient({
 });
 
 export function AppWrapper({ children }) {
+
   const [colorScheme, setColorScheme] = useState("dark");
   const theme = useSelector(selectTheme);
 
