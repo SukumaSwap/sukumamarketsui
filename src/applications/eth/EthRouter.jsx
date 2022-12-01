@@ -36,7 +36,7 @@ import { getState, SukMarketFunctionCall } from '../../app/nearutils';
 import { showNotification } from '@mantine/notifications';
 import { useState } from 'react';
 
-const CreateNearRouter = () => {
+const CreateEthRouter = () => {
   const [tx, setTx] = useState(null)
   const createAccount = () => {
     // Function called whenever near url is called once, to make sure the user has a registered account.
@@ -146,4 +146,4 @@ const CreateNearRouter = () => {
   )
 }
 
-export default CreateNearRouter
+export default CreateEthRouter
