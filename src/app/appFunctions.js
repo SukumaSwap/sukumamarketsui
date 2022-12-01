@@ -1,4 +1,4 @@
-import { CURRENCIES } from "./appconfig";
+import { CURRENCIES, PAYMENT_METHODS } from "./appconfig";
 
 const validateUrl = (url) => {
   const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
@@ -63,6 +63,16 @@ export const getCurrencies = (symbols_array) => {
   })
 
   return currencies
+}
+
+export const getPaymentMethods = (symbols_array) => {
+  let methods = []
+  symbols_array.forEach(s => {
+    let obj = PAYMENT_METHODS.find(o => o.name === s)
+    methods.push(obj)
+  })
+
+  return methods
 }
 
 

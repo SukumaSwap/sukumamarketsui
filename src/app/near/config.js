@@ -15,6 +15,7 @@ function getConfig(env) {
       walletUrl: 'https://wallet.near.org',
       helperUrl: 'https://helper.mainnet.near.org',
       explorerUrl: 'https://explorer.mainnet.near.org',
+      provider: "https://archival-rpc.mainnet.near.org",
     }
   case 'development':
   case 'testnet':
@@ -25,6 +26,7 @@ function getConfig(env) {
       walletUrl: 'https://wallet.testnet.near.org',
       helperUrl: 'https://helper.testnet.near.org',
       explorerUrl: 'https://explorer.testnet.near.org',
+      provider: "https://archival-rpc.testnet.near.org",
     }
   case 'betanet':
     return {
@@ -34,6 +36,7 @@ function getConfig(env) {
       walletUrl: 'https://wallet.betanet.near.org',
       helperUrl: 'https://helper.betanet.near.org',
       explorerUrl: 'https://explorer.betanet.near.org',
+      provider: "https://archival-rpc.betanet.near.org",
     }
   case 'local':
     return {

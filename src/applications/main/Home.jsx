@@ -1,40 +1,14 @@
-import { Box, Anchor, Avatar, Burger, Center, Container, Grid, Group, Header, MediaQuery, Paper, Stack, Text, Title, Transition, useMantineTheme } from '@mantine/core'
+import { Box, Anchor, Avatar, Center, Container, Grid, Group, Paper, Stack, Text, Title, Transition, useMantineTheme } from '@mantine/core'
 import { useState, useEffect } from 'react'
-import CustomNavLink from '../../components/common/CustomNavlink';
 import { IconAsset, IconBrandGithub, IconCurrencyDollar, IconExchange, IconHeartHandshake, IconHome, IconHomeDollar, IconNetwork, IconSocial, IconSwitchHorizontal, IconUsers, IconWallpaper } from '@tabler/icons'
-import CustomNavbarLink from '../../components/common/CustomNavbarLink';
-import NetworkSwitcher from '../../components/common/NetworkSwitcher';
-import AccountButton, { ConnectWalletButton, SmConnectWalletButton } from '../../components/common/AccountButton';
-import { AccountDrawer, NetworkDrawer, ThemeSwitcher } from '../../components/common/ThemeSwitcher';
-import { Link, useNavigate } from 'react-router-dom';
+import  { ConnectWalletButton } from '../../components/common/AccountButton';
 import { useHover } from '@mantine/hooks';
 import { getTheme } from '../../app/appFunctions';
 import { Carousel } from '@mantine/carousel';
 import { NETWORKS } from '../../app/appconfig';
-
-const navbarlinks = [
-    {
-        label: "Buy",
-        to: "./market/buy",
-        disabled: false,
-        icon: <IconSocial size={18} />,
-        description: null,
-    },
-    {
-        label: "Sell",
-        to: "./market/sell",
-        disabled: false,
-        icon: <IconSocial size={18} />,
-        description: null,
-    },
-    {
-        label: "Swap",
-        to: "./market/swap",
-        disabled: true,
-        icon: <IconSocial size={18} />,
-        description: null,
-    },
-]
+import { selectNetwork } from '../../features/app/appSlice';
+import { useSelector } from 'react-redux';
+import MainHeader from '../../components/layout/MainHeader';
 
 const solutions = [
     {
@@ -202,68 +176,16 @@ const Home = () => {
     const [logged_in, setLogged_in] = useState(window.walletConnection.isSignedIn())
     const theme = useMantineTheme();
     const [opened, setOpened] = useState(false);
-    const navigate = useNavigate()
+    const network = useSelector(selectNetwork)
 
-    let acc = window.walletConnection.getAccountId()
-
-    const openSidebar = (value) => {
-        setOpened(value)
-    }
 
     useEffect(() => {
         setLogged_in(window.walletConnection.isSignedIn())
     }, [window.walletConnection])
+
     return (
         <div>
-            <Header height={60} p="md" fixed>
-                <div style={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: "space-between" }}>
-                    <Group spacing={10}>
-                        <MediaQuery largerThan="sm" styles={{ display: 'none !important' }}>
-                            <Burger
-                                opened={opened}
-                                onClick={() => setOpened((o) => !o)}
-                                size="sm"
-                                color={theme.colors.gray[6]}
-                            />
-                        </MediaQuery>
-                        <Link to="/" style={{ color: getTheme(theme) ? theme.colors.gray[1] : theme.colors.dark[7], textDecoration: "none" }}>
-                            <Title order={2}> Sukuma </Title>
-                        </Link>
-                    </Group>
-
-                    <MediaQuery smallerThan="md" styles={{ display: 'none !important' }}>
-                        <Group>
-                            {
-                                navbarlinks.map((link, i) => (
-                                    <CustomNavbarLink key={`sidebar_link__nav_other_${i}`} obj={link} />
-                                ))
-                            }
-                        </Group>
-                    </MediaQuery>
-                    <Group>
-                        <MediaQuery smallerThan="md" styles={{ display: 'none !important' }}>
-                            <Group>
-                                <NetworkSwitcher />
-                                {
-                                    logged_in ? <AccountButton /> : <ConnectWalletButton />
-                                }
-                            </Group>
-                        </MediaQuery>
-                        <Group p="0">
-                            <MediaQuery largerThan="sm" styles={{ display: 'none !important' }}>
-                                <Group>
-
-                                    <NetworkDrawer />
-                                    {
-                                        logged_in ? <AccountDrawer /> : <SmConnectWalletButton />
-                                    }
-                                </Group>
-                            </MediaQuery>
-                            <ThemeSwitcher />
-                        </Group>
-                    </Group>
-                </div>
-            </Header>
+            <MainHeader />
             <div style={{ height: "calc(100vh)" }}>
                 <Center className='h-100'>
                     <Stack>
@@ -302,20 +224,22 @@ const Home = () => {
             })}>
                 <Container size="lg" style={{ padding: "30px 0" }}>
                     <Title order={2} mt="xl" mb="xl">Networks</Title>
-                    <Carousel slideSize="20%" slideGap={30} align="start">
+                    <Carousel slideSize="25%" slideGap={30} align="start">
                         {
                             NETWORKS?.map((network, i) => (
                                 <Carousel.Slide key={`${i}`}>
                                     <Paper radius="lg" sx={theme => ({
                                         height: "150px",
-                                        background: getTheme(theme) ? theme.colors.dark[5] : theme.colors.gray[0],
+                                        background: getTheme(theme) ? theme.colors.dark[7] : theme.colors.gray[0],
                                     })}>
                                         <Center className='h-100'>
                                             <Group px="xl">
                                                 <Stack spacing={10}>
-                                                    <Avatar src={network?.icon} size={62} mx="auto" />
+                                                    <Avatar src={network?.icon} radius="xl" sx={{
+                                                        background: getTheme(theme) ? theme.colors.dark[5] : theme.colors.gray[0],
+                                                    }} size={62} mx="auto" />
                                                     <Text align='center' size="xs">{!network.active && 'Coming soon'}</Text>
-                                                    <Title order={4}>{network?.name}</Title>
+                                                    <Title order={4} align="center">{network?.name}</Title>
                                                 </Stack>
                                             </Group>
                                         </Center>

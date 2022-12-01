@@ -1,5 +1,6 @@
 import { Menu, Button, Text, Group, Paper, Avatar, Stack } from '@mantine/core';
 import { NETWORKS } from '../../app/appconfig';
+import { getTextCount } from '../../app/appFunctions';
 import { selectNetwork, setNetwork } from '../../features/app/appSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -70,8 +71,8 @@ export const MenuNetwork = ({ network }) => {
 
 function NetworkSwitcher() {
     const network = useSelector(selectNetwork)
-    return (
-        <Menu shadow="md" width={230} radius="lg">
+    return ( 
+        <Menu shadow="md" width={270} radius="lg">
             <Menu.Target>
                 <Button radius="xl" style={{
                     height: "42px",
@@ -80,7 +81,7 @@ function NetworkSwitcher() {
                     <Group>
                         <Text style={{
                             textTransform: "uppercase"
-                        }}>{network?.name}</Text>
+                        }}>{getTextCount(network?.name, 4)}</Text>
                         <Avatar size="sm" src={network?.icon} />
                     </Group>
                 </Button>

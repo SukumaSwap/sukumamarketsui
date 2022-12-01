@@ -1,7 +1,12 @@
-import { BigNumber } from "bignumber.js"
-import { TOKEN_DETAILS, WHITELISTEDTOKENS_ } from "./appconfig";
 
+import { BigNumber } from "bignumber.js"
+import { CONTRACT, TOKEN_DETAILS, WHITELISTEDTOKENS_ } from "./appconfig";
+import getConfig from './near/config';
+
+const BN = require("bn.js")
 const nearAPI = require("near-api-js");
+const { utils, providers } = nearAPI
+const config = getConfig("testnet")
 
 export const calculateNear = (yoctoNear) => {
   if (yoctoNear) {
@@ -152,4 +157,69 @@ export const makeTokens = (tokensObject) => {
     })
   }
   return tokens_
+}
+
+export const ONE_YOCTO_NEAR = '0.000000000000000000000001';
+
+export const getGas = (gas) =>
+  gas ? new BN(gas) : new BN('100000000000000');
+
+export const getAmount = (amount) =>
+  amount ? new BN(utils.format.parseNearAmount(amount)) : new BN('0');
+
+
+export const getUserWalletTokens = async () => {
+  return await fetch(
+    config.helperUrl +
+    '/account/' +
+    window.walletConnection.getAccountId() +
+    '/likelyTokens',
+    {
+      method: 'GET',
+      headers: { 'Content-type': 'application/json; charset=UTF-8' },
+    }
+  )
+    .then((res) => res.json())
+    .then((tokens) => {
+      return tokens;
+    });
+};
+
+export const SukMarketFunctionCall = (wallet, {
+  methodName,
+  args,
+  gas,
+  amount,
+}) => {
+  return wallet
+    .account()
+    .functionCall(
+      CONTRACT,
+      methodName,
+      args,
+      getGas(gas),
+      getAmount(amount)
+    );
+};
+
+export const SukMarketViewFunctionCall = (wallet, {
+  methodName,
+  args,
+}) => {
+  return wallet.account().viewFunction(CONTRACT, methodName, args);
+};
+
+export async function getState(txHash, accountId) {
+  const provider = new providers.JsonRpcProvider(
+    config.provider
+  );
+  const result = await provider.txStatus(txHash, accountId);
+  return result
+}
+
+export const convertResultToText = (response) => {
+  const res = JSON.parse(
+    response.result.map((x) => String.fromCharCode(x)).join('')
+  );
+  return res
 }

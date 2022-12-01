@@ -2,7 +2,7 @@ import { NavLink, Text, useMantineTheme } from '@mantine/core'
 import React from 'react'
 import { Link, useMatch, useResolvedPath } from 'react-router-dom'
 
-const CustomNavbarLink = ({ obj }) => {
+const CustomNavbarLink = ({ obj, url_prefix }) => {
     const theme = useMantineTheme()
     let resolved = useResolvedPath(obj.to);
     let match = useMatch({ path: resolved.pathname, end: true });
@@ -16,7 +16,7 @@ const CustomNavbarLink = ({ obj }) => {
     return (
         <NavLink component={Link}
             label={<Text size="md">{obj?.label}</Text>}
-            to={obj?.to} disabled={obj?.disabled}
+            to={`/${url_prefix}/${obj?.to}`} disabled={obj?.disabled}
             px="xl"
             mr="lg"
             sx={theme => ({

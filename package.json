@@ -2,6 +2,7 @@
   "name": "schtools-react",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://sukuma.livesoftwaredeveloper.com/",
   "dependencies": {
     "@emotion/react": "^11.10.4",
     "@mantine/carousel": "^5.2.5",
