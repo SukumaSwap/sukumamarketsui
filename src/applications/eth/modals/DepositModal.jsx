@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js'
 import { utils } from 'near-api-js';
 import { useEffect } from 'react';
 import { useMemo } from 'react';
-import { CONTRACT, NEAR_OBJECT } from '../../../app/appconfig';
+import { CONTRACT, NEAR_OBJECT } from '../../../app/appconfig'; //change to eth
 import { showNotification } from '@mantine/notifications';
 import { BigNumberCompare, getReadableTokenBalance } from '../../../app/nearutils';
 import { useModals } from '@mantine/modals';
