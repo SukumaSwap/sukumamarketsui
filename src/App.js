@@ -13,7 +13,7 @@ import Home from './applications/main/Home';
 
 import { showNotification } from '@mantine/notifications';
 import CreateNearRouter from './applications/near/NearRouter';
-import { CreateEthRouter} from './applications/eth/EthRouter';
+import CreateEthRouter from './applications/eth/EthRouter';
 
 const MainHome = () => {
 
@@ -70,7 +70,8 @@ function App() {
       <Routes>
         <Route path='/' element={<MainHome />} >
           <Route path='/' element={<Home />} />
-          {CreateNearRouter()} || { CreateEthRouter ()}
+          {CreateNearRouter()} 
+          { CreateEthRouter ()}
         </Route>
 
         

@@ -65,7 +65,7 @@ const CreateBuyTrade = () => {
             }
         }
     }
-
+//fuction for conversion fiat crypto
     const payChange = (value) => {
         const SELLER_NEAR_PRICE_IN_USD = calcOfferRate(offerDetails?.offer_rate, tokenPrice)
 
