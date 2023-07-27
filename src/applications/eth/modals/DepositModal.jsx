@@ -41,7 +41,7 @@ const Asset = ({ token, current_token, select, setMetadata, settokenbal }) => {
 
     const getTokenBalance = () => {
         const wallet = window.walletConnection
-        if (current_token?.tokenId === "near") {
+        if (current_token?.tokenId === "eth") {
             setBal(current_token?.balance)
             return
         }
